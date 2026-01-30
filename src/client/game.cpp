@@ -3347,7 +3347,9 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 
 		client->interact(INTERACT_DIGGING_COMPLETED, pointed);
 
-		client->getParticleManager()->addDiggingParticles(player, nodepos, n);
+    if (g_settings->getBool("enable_dig_particles")) {
+      client->getParticleManager()->addDiggingParticles(player, nodepos, n);
+    }
 
 		// Send event to trigger sound
 		client->getEventManager()->put(new NodeDugEvent(nodepos, n));
