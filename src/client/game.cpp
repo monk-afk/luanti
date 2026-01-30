@@ -3261,8 +3261,9 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 		runData.dig_time_complete = 10000000.0;
 	} else {
 		runData.dig_time_complete = params.time;
-
-		client->getParticleManager()->addNodeParticle(player, nodepos, n);
+    if (g_settings->getBool("enable_dig_particles")) {
+      client->getParticleManager()->addNodeParticle(player, nodepos, n);
+    }
 	}
 
 	if (!runData.digging) {
