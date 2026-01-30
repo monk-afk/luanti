@@ -708,6 +708,12 @@
 #    type: bool
 # soft_clouds = false
 
+### Particles
+
+#    Enable particle effect while digging and on node dug
+#    type: bool
+# enable_dig_particles = true
+
 ### Filtering and Antialiasing
 
 #    Use mipmaps when scaling textures. May slightly increase performance,
