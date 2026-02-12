@@ -517,6 +517,13 @@ private:
 		std::unordered_set<session_t> waiting_players;
 	};
 
+	struct PendingAuthLookup {
+		std::string player_name;
+		std::string ip_address;
+		std::string handle;
+		u64 started_us = 0;
+	};
+
 	// The standard library does not implement std::hash for pairs so we have this:
 	struct SBCHash {
 		size_t operator() (const std::pair<v3s16, u16> &p) const {
@@ -527,6 +534,9 @@ private:
 	typedef std::unordered_map<std::pair<v3s16, u16>, std::string, SBCHash> SerializedBlockCache;
 
 	void init();
+	void stepPendingAuthLookups();
+	bool sendAuthMethods(session_t peer_id, const std::string &player_name,
+		bool has_auth, const std::string &encpwd);
 
 	void SendMovement(session_t peer_id);
 	void SendHP(session_t peer_id, u16 hp, bool effect);
@@ -778,6 +788,7 @@ private:
 
 	// pending dynamic media callbacks, clients inform the server when they have a file fetched
 	std::unordered_map<u32, PendingDynamicMediaCallback> m_pending_dyn_media;
+	std::unordered_map<session_t, PendingAuthLookup> m_pending_auth_lookups;
 	float m_step_pending_dyn_media_timer = 0.0f;
 
 	/*

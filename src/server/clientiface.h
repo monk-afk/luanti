@@ -165,6 +165,7 @@ enum ClientState
 	CS_Disconnecting,
 	CS_Denied,
 	CS_Created,
+	CS_AuthPending,
 	CS_HelloSent,
 	CS_AwaitingInit2,
 	CS_InitDone,
@@ -176,6 +177,7 @@ enum ClientState
 enum ClientStateEvent
 {
 	CSE_Hello,
+	CSE_AuthStart,
 	CSE_AuthAccept,
 	CSE_GotInit2,
 	CSE_SetDenied,
@@ -304,6 +306,8 @@ public:
 	/* set expected serialization version */
 	void setPendingSerializationVersion(u8 version)
 		{ m_pending_serialization_version = version; }
+	u8 getPendingSerializationVersion() const
+		{ return m_pending_serialization_version; }
 
 	void confirmSerializationVersion()
 		{ serialization_version = m_pending_serialization_version; }
@@ -526,4 +530,5 @@ private:
 	// Note that this puts a fixed timeout on the init & auth phase for a client.
 	// (lingering is enforced until CS_InitDone)
 	static constexpr int LINGER_TIMEOUT = 12;
+	static constexpr int ASYNC_AUTH_LINGER_TIMEOUT = 60;
 };

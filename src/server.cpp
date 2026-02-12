@@ -32,6 +32,7 @@
 #include "server/serverlist.h"
 #include "settings.h"
 #include "translation.h"
+#include "util/auth.h"
 #include "util/base64.h"
 #include "util/hashing.h"
 #include "util/hex.h"
@@ -669,6 +670,8 @@ void Server::AsyncRunStep(float dtime, bool initial_step)
 		// Send blocks to clients
 		SendBlocks(dtime);
 	}
+
+	stepPendingAuthLookups();
 
 	// If paused, this function is called with a 0.0f literal
 	if ((dtime == 0.0f) && !initial_step)
@@ -2940,6 +2943,133 @@ void Server::stepPendingDynMediaCallbacks(float dtime)
 	});
 }
 
+bool Server::sendAuthMethods(session_t peer_id, const std::string &player_name,
+		bool has_auth, const std::string &encpwd)
+{
+	RemoteClient *client = getClientNoEx(peer_id, CS_Created);
+	if (!client)
+		return false;
+
+	u32 auth_mechs = 0;
+	client->chosen_mech = AUTH_MECHANISM_NONE;
+
+	if (has_auth) {
+		std::vector<std::string> pwd_components = str_split(encpwd, '#');
+		if (pwd_components.size() == 4) {
+			if (pwd_components[1] == "1") { // 1 means srp
+				auth_mechs |= AUTH_MECHANISM_SRP;
+				client->enc_pwd = encpwd;
+			} else {
+				actionstream << "User " << player_name << " tried to log in, "
+					"but password field was invalid (unknown mechcode)." <<
+					std::endl;
+				DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
+				return false;
+			}
+		} else if (base64_is_valid(encpwd)) {
+			auth_mechs |= AUTH_MECHANISM_LEGACY_PASSWORD;
+			client->enc_pwd = encpwd;
+		} else {
+			actionstream << "User " << player_name << " tried to log in, but "
+				"password field was invalid (invalid base64)." << std::endl;
+			DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
+			return false;
+		}
+	} else {
+		std::string default_password = g_settings->get("default_password");
+		if (isSingleplayer() || default_password.length() == 0) {
+			auth_mechs |= AUTH_MECHANISM_FIRST_SRP;
+		} else {
+			// Take care of default passwords.
+			client->enc_pwd = get_encoded_srp_verifier(player_name, default_password);
+			auth_mechs |= AUTH_MECHANISM_SRP;
+			// Allocate player in db, but only on successful login.
+			client->create_player_on_auth_success = true;
+		}
+	}
+
+	verbosestream << "Sending TOCLIENT_HELLO with auth method field: "
+		<< auth_mechs << std::endl;
+
+	NetworkPacket resp_pkt(TOCLIENT_HELLO, 0, peer_id);
+	resp_pkt << client->getPendingSerializationVersion() << u16(0) /* unused */
+		<< client->net_proto_version
+		<< auth_mechs << std::string_view() /* unused */;
+	Send(&resp_pkt);
+
+	client->allowed_auth_mechs = auth_mechs;
+	m_clients.event(peer_id, CSE_Hello);
+	return true;
+}
+
+void Server::stepPendingAuthLookups()
+{
+	EnvAutoLock lock(this);
+
+	if (m_pending_auth_lookups.empty())
+		return;
+
+	static constexpr u64 AUTH_LOOKUP_TIMEOUT_US = 30ULL * 1000 * 1000;
+	const u64 now_us = porting::getTimeUs();
+
+	for (auto it = m_pending_auth_lookups.begin(); it != m_pending_auth_lookups.end(); ) {
+		const session_t peer_id = it->first;
+		PendingAuthLookup &lookup = it->second;
+
+		RemoteClient *client = getClientNoEx(peer_id, CS_Created);
+		if (!client || client->getState() != CS_AuthPending) {
+			it = m_pending_auth_lookups.erase(it);
+			continue;
+		}
+
+		if (now_us - lookup.started_us > AUTH_LOOKUP_TIMEOUT_US) {
+			actionstream << "Server: Asynchronous auth timed out for player \""
+				<< lookup.player_name << "\" from " << lookup.ip_address << std::endl;
+			DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
+			it = m_pending_auth_lookups.erase(it);
+			continue;
+		}
+
+		bool has_auth = false;
+		std::string encpwd;
+		ScriptApiServer::AuthLookupStatus status;
+		try {
+			status = m_script->pollAuthLookup(lookup.player_name, lookup.handle,
+				&has_auth, &encpwd);
+		} catch (const std::exception &e) {
+			errorstream << "Asynchronous auth failed for player \"" << lookup.player_name
+				<< "\": " << e.what() << std::endl;
+			DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
+			it = m_pending_auth_lookups.erase(it);
+			continue;
+		}
+
+		if (status == ScriptApiServer::AuthLookupStatus::Pending) {
+			++it;
+			continue;
+		}
+
+		if (status == ScriptApiServer::AuthLookupStatus::Unsupported) {
+			warningstream << "Authentication handler provides begin_auth but not poll_auth; "
+				<< "falling back to synchronous get_auth for " << lookup.player_name
+				<< std::endl;
+			try {
+				has_auth = m_script->getAuth(lookup.player_name, &encpwd, nullptr);
+				sendAuthMethods(peer_id, lookup.player_name, has_auth, encpwd);
+			} catch (const std::exception &e) {
+				errorstream << "Fallback get_auth failed for " << lookup.player_name
+					<< ": " << e.what() << std::endl;
+				DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
+			}
+			it = m_pending_auth_lookups.erase(it);
+			continue;
+		}
+
+		sendAuthMethods(peer_id, lookup.player_name, has_auth, encpwd);
+		it = m_pending_auth_lookups.erase(it);
+	}
+}
+
 void Server::SendMinimapModes(session_t peer_id,
 		std::vector<MinimapMode> &modes, size_t wanted_mode)
 {
@@ -3070,6 +3200,8 @@ void Server::acceptAuth(session_t peer_id, bool forSudoMode)
 
 void Server::DeleteClient(session_t peer_id, ClientDeletionReason reason)
 {
+	m_pending_auth_lookups.erase(peer_id);
+
 	std::wstring message;
 	{
 		/*

@@ -7,6 +7,44 @@
 #include "common/c_converter.h"
 #include "util/numeric.h" // myrand
 
+namespace {
+
+void readAuthResultTable(lua_State *L, int index, std::string *dst_password,
+		std::set<std::string> *dst_privs, s64 *dst_last_login)
+{
+	luaL_checktype(L, index, LUA_TTABLE);
+
+	std::string password;
+	if (!getstringfield(L, index, "password", password))
+		throw LuaError("Authentication handler didn't return password");
+	if (dst_password)
+		*dst_password = password;
+
+	lua_getfield(L, index, "privileges");
+	if (!lua_istable(L, -1))
+		throw LuaError("Authentication handler didn't return privilege table");
+	if (dst_privs) {
+		dst_privs->clear();
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0) {
+			std::string key = luaL_checkstring(L, -2);
+			bool value = lua_toboolean(L, -1);
+			if (value)
+				dst_privs->insert(key);
+			lua_pop(L, 1);
+		}
+	}
+	lua_pop(L, 1);
+
+	s64 last_login = 0;
+	if (!getintfield(L, index, "last_login", last_login))
+		throw LuaError("Authentication handler didn't return last_login");
+	if (dst_last_login)
+		*dst_last_login = last_login;
+}
+
+} // namespace
+
 bool ScriptApiServer::getAuth(const std::string &playername,
 		std::string *dst_password,
 		std::set<std::string> *dst_privs,
@@ -27,28 +65,106 @@ bool ScriptApiServer::getAuth(const std::string &playername,
 	// nil = login not allowed
 	if (lua_isnil(L, -1))
 		return false;
-	luaL_checktype(L, -1, LUA_TTABLE);
 
-	std::string password;
-	if (!getstringfield(L, -1, "password", password))
-		throw LuaError("Authentication handler didn't return password");
-	if (dst_password)
-		*dst_password = password;
-
-	lua_getfield(L, -1, "privileges");
-	if (!lua_istable(L, -1))
-		throw LuaError("Authentication handler didn't return privilege table");
-	if (dst_privs)
-		readPrivileges(-1, *dst_privs);
-	lua_pop(L, 1);  // Remove key from privs table
-
-	s64 last_login;
-	if(!getintfield(L, -1, "last_login", last_login))
-		throw LuaError("Authentication handler didn't return last_login");
-	if (dst_last_login)
-		*dst_last_login = (s64)last_login;
+	readAuthResultTable(L, -1, dst_password, dst_privs, dst_last_login);
 
 	return true;
+}
+
+ScriptApiServer::AuthLookupStatus ScriptApiServer::beginAuthLookup(
+		const std::string &playername, const std::string &ip_address,
+		bool *dst_has_auth, std::string *dst_password, std::string *dst_handle)
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	if (dst_has_auth)
+		*dst_has_auth = false;
+	if (dst_password)
+		dst_password->clear();
+	if (dst_handle)
+		dst_handle->clear();
+
+	int error_handler = PUSH_ERROR_HANDLER(L);
+	getAuthHandler();
+	lua_getfield(L, -1, "begin_auth");
+	if (lua_type(L, -1) != LUA_TFUNCTION) {
+		lua_pop(L, 2); // missing field + auth handler
+		lua_pop(L, 1); // error handler
+		return AuthLookupStatus::Unsupported;
+	}
+
+	lua_pushstring(L, playername.c_str());
+	lua_pushstring(L, ip_address.c_str());
+	PCALL_RES(lua_pcall(L, 2, 1, error_handler));
+	lua_remove(L, -2); // Remove auth handler
+	lua_remove(L, error_handler);
+
+	if (lua_isstring(L, -1)) {
+		if (dst_handle)
+			*dst_handle = lua_tostring(L, -1);
+		lua_pop(L, 1);
+		return AuthLookupStatus::Pending;
+	}
+
+	if (lua_isnil(L, -1) || (lua_isboolean(L, -1) && !lua_toboolean(L, -1))) {
+		lua_pop(L, 1);
+		return AuthLookupStatus::Done;
+	}
+
+	if (!lua_istable(L, -1))
+		throw LuaError("begin_auth must return false, nil, table, or request handle string");
+
+	readAuthResultTable(L, -1, dst_password, nullptr, nullptr);
+	if (dst_has_auth)
+		*dst_has_auth = true;
+	lua_pop(L, 1);
+	return AuthLookupStatus::Done;
+}
+
+ScriptApiServer::AuthLookupStatus ScriptApiServer::pollAuthLookup(
+		const std::string &playername, const std::string &handle,
+		bool *dst_has_auth, std::string *dst_password)
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	if (dst_has_auth)
+		*dst_has_auth = false;
+	if (dst_password)
+		dst_password->clear();
+
+	int error_handler = PUSH_ERROR_HANDLER(L);
+	getAuthHandler();
+	lua_getfield(L, -1, "poll_auth");
+	if (lua_type(L, -1) != LUA_TFUNCTION) {
+		lua_pop(L, 2); // missing field + auth handler
+		lua_pop(L, 1); // error handler
+		return AuthLookupStatus::Unsupported;
+	}
+
+	lua_pushstring(L, playername.c_str());
+	lua_pushstring(L, handle.c_str());
+	PCALL_RES(lua_pcall(L, 2, 1, error_handler));
+	lua_remove(L, -2); // Remove auth handler
+	lua_remove(L, error_handler);
+
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return AuthLookupStatus::Pending;
+	}
+
+	if (lua_isboolean(L, -1) && !lua_toboolean(L, -1)) {
+		lua_pop(L, 1);
+		return AuthLookupStatus::Done;
+	}
+
+	if (!lua_istable(L, -1))
+		throw LuaError("poll_auth must return nil, false, or auth table");
+
+	readAuthResultTable(L, -1, dst_password, nullptr, nullptr);
+	if (dst_has_auth)
+		*dst_has_auth = true;
+	lua_pop(L, 1);
+	return AuthLookupStatus::Done;
 }
 
 void ScriptApiServer::getAuthHandler()

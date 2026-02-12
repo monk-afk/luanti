@@ -205,65 +205,42 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 	/*
 		Compose auth methods for answer
 	*/
-	std::string encpwd; // encrypted Password field for the user
-	bool has_auth = m_script->getAuth(playername, &encpwd, nullptr);
-	u32 auth_mechs = 0;
+	std::string encpwd;
+	bool has_auth = false;
+	std::string async_auth_handle;
+	ScriptApiServer::AuthLookupStatus auth_status;
+	try {
+		auth_status = m_script->beginAuthLookup(playername, addr_s, &has_auth,
+			&encpwd, &async_auth_handle);
+	} catch (const std::exception &e) {
+		errorstream << "Authentication lookup failed for \"" << playername
+			<< "\": " << e.what() << std::endl;
+		DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
+		return;
+	}
 
-	client->chosen_mech = AUTH_MECHANISM_NONE;
-
-	if (has_auth) {
-		std::vector<std::string> pwd_components = str_split(encpwd, '#');
-		if (pwd_components.size() == 4) {
-			if (pwd_components[1] == "1") { // 1 means srp
-				auth_mechs |= AUTH_MECHANISM_SRP;
-				client->enc_pwd = encpwd;
-			} else {
-				actionstream << "User " << playername << " tried to log in, "
-					"but password field was invalid (unknown mechcode)." <<
-					std::endl;
-				DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
-				return;
-			}
-		} else if (base64_is_valid(encpwd)) {
-			auth_mechs |= AUTH_MECHANISM_LEGACY_PASSWORD;
-			client->enc_pwd = encpwd;
-		} else {
-			actionstream << "User " << playername << " tried to log in, but "
-				"password field was invalid (invalid base64)." << std::endl;
+	if (auth_status == ScriptApiServer::AuthLookupStatus::Pending) {
+		if (async_auth_handle.empty()) {
+			errorstream << "Authentication handler returned pending state without handle"
+				<< std::endl;
 			DenyAccess(peer_id, SERVER_ACCESSDENIED_SERVER_FAIL);
 			return;
 		}
-	} else {
-		std::string default_password = g_settings->get("default_password");
-		if (isSingleplayer() || default_password.length() == 0) {
-			auth_mechs |= AUTH_MECHANISM_FIRST_SRP;
-		} else {
-			// Take care of default passwords.
-			client->enc_pwd = get_encoded_srp_verifier(playerName, default_password);
-			auth_mechs |= AUTH_MECHANISM_SRP;
-			// Allocate player in db, but only on successful login.
-			client->create_player_on_auth_success = true;
-		}
+
+		m_pending_auth_lookups[peer_id] = {
+			playerName,
+			addr_s,
+			async_auth_handle,
+			porting::getTimeUs()
+		};
+		m_clients.event(peer_id, CSE_AuthStart);
+		return;
 	}
 
-	/*
-		Answer with a TOCLIENT_HELLO
-	*/
+	if (auth_status == ScriptApiServer::AuthLookupStatus::Unsupported)
+		has_auth = m_script->getAuth(playername, &encpwd, nullptr);
 
-	verbosestream << "Sending TOCLIENT_HELLO with auth method field: "
-		<< auth_mechs << std::endl;
-
-	NetworkPacket resp_pkt(TOCLIENT_HELLO, 0, peer_id);
-
-	resp_pkt << serialization_ver << u16(0) /* unused */
-		<< net_proto_version
-		<< auth_mechs << std::string_view() /* unused */;
-
-	Send(&resp_pkt);
-
-	client->allowed_auth_mechs = auth_mechs;
-
-	m_clients.event(peer_id, CSE_Hello);
+	sendAuthMethods(peer_id, playerName, has_auth, encpwd);
 }
 
 void Server::handleCommand_Init2(NetworkPacket* pkt)

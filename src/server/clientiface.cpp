@@ -41,6 +41,7 @@ const char *ClientInterface::statenames[] = {
 	"Disconnecting",
 	"Denied",
 	"Created",
+	"AuthPending",
 	"HelloSent",
 	"AwaitingInit2",
 	"InitDone",
@@ -470,6 +471,9 @@ void RemoteClient::notifyEvent(ClientStateEvent event)
 		case CSE_Hello:
 			m_state = CS_HelloSent;
 			break;
+		case CSE_AuthStart:
+			m_state = CS_AuthPending;
+			break;
 		case CSE_Disconnect:
 			m_state = CS_Disconnecting;
 			break;
@@ -479,6 +483,22 @@ void RemoteClient::notifyEvent(ClientStateEvent event)
 		/* GotInit2 SetDefinitionsSent SetMediaSent */
 		default:
 			myerror << "Created: Invalid client state transition! " << event;
+			throw ClientStateError(myerror.str());
+		}
+		break;
+	case CS_AuthPending:
+		switch (event) {
+		case CSE_Hello:
+			m_state = CS_HelloSent;
+			break;
+		case CSE_Disconnect:
+			m_state = CS_Disconnecting;
+			break;
+		case CSE_SetDenied:
+			m_state = CS_Denied;
+			break;
+		default:
+			myerror << "AuthPending: Invalid client state transition! " << event;
 			throw ClientStateError(myerror.str());
 		}
 		break;
@@ -710,7 +730,9 @@ void ClientInterface::step(float dtime)
 		auto state = it.second->getState();
 		if (state >= CS_InitDone)
 			continue;
-		if (it.second->uptime() <= LINGER_TIMEOUT)
+		const int linger_timeout = state == CS_AuthPending ?
+			ASYNC_AUTH_LINGER_TIMEOUT : LINGER_TIMEOUT;
+		if (it.second->uptime() <= linger_timeout)
 			continue;
 		// Complain louder if this situation is unexpected
 		auto &os = state == CS_Disconnecting || state == CS_Denied ?

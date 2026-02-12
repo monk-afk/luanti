@@ -1,0 +1,70 @@
+# oauth_async_auth_test
+
+Minimal async authentication handler for testing OAuth-like external validation.
+
+This mod uses the new async auth hooks:
+- `begin_auth(name, ip)`
+- `poll_auth(name, handle)`
+
+and uses Luanti HTTP async fetch to avoid blocking login in `TOSERVER_INIT`.
+
+## 1) Enable the mod
+
+Add it to your world and enable it (depends on how you manage mods).
+
+## 2) Allow HTTP for this mod
+
+In `minetest.conf` or world config:
+
+```conf
+secure.http_mods = oauth_async_auth_test
+```
+
+## 3) Start the mock auth service
+
+```bash
+./util/mock_oauth_server.py --host 127.0.0.1 --port 8085 --delay 1.5
+```
+
+Known test users:
+- `alice` / `alicepass` (normal privs)
+- `admin` / `adminpass` (admin-like privs)
+- `denied` (always denied)
+- `slow` (forced delay > 30s to test timeout behavior)
+
+## 4) Optional mod settings
+
+```conf
+oauth_async_auth_test.url = http://127.0.0.1:8085/auth
+oauth_async_auth_test.timeout = 10
+oauth_async_auth_test.use_remote_privileges = false
+oauth_async_auth_test.log_pending_polls = false
+```
+
+By default (`use_remote_privileges = false`) the mod ignores privileges returned by
+the mock OAuth service and uses server-local privileges from Luanti auth storage.
+This models shared credentials + per-server authorization.
+
+### Logging
+
+The mod logs major auth steps by default (begin, success, deny/failure, local fallback).
+
+If you also want a log line for every pending poll cycle, enable:
+
+```conf
+oauth_async_auth_test.log_pending_polls = true
+```
+
+Note: this can get very noisy under load.
+
+## 5) Quick tests
+
+1. Login as `alice` with password `alicepass` => should authenticate.
+2. Login as `denied` with any password => should be denied.
+3. Login as `slow` => should hit async auth timeout on the server side.
+
+## Notes
+
+- This is a test harness, not production OAuth.
+- The mock service returns plaintext test passwords; the mod converts them to SRP verifier format using `core.get_password_hash(name, password)`.
+- For real OAuth, your service should return material that maps to the SRP verifier expected by Luanti's auth flow.

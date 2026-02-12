@@ -42,6 +42,12 @@ core.builtin_auth_handler = {
 			last_login = auth_entry.last_login,
 		}
 	end,
+	-- Optional async auth API used by the engine login path.
+	-- Builtin auth resolves immediately and returns the same payload as get_auth.
+	begin_auth = function(name, ip)
+		assert(type(name) == "string")
+		return core.builtin_auth_handler.get_auth(name)
+	end,
 	create_auth = function(name, password)
 		assert(type(name) == "string")
 		assert(type(password) == "string")
