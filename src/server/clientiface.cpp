@@ -730,8 +730,9 @@ void ClientInterface::step(float dtime)
 		auto state = it.second->getState();
 		if (state >= CS_InitDone)
 			continue;
-		const int linger_timeout = state == CS_AuthPending ?
-			ASYNC_AUTH_LINGER_TIMEOUT : LINGER_TIMEOUT;
+		const u64 linger_timeout = state == CS_AuthPending ?
+			static_cast<u64>(ASYNC_AUTH_LINGER_TIMEOUT) :
+			static_cast<u64>(LINGER_TIMEOUT);
 		if (it.second->uptime() <= linger_timeout)
 			continue;
 		// Complain louder if this situation is unexpected
