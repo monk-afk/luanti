@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Very small OAuth-like auth mock for Luanti async auth testing.
+Very small local HTTP auth server for Luanti async auth testing.
 
 Endpoint:
   GET /auth?name=<player>&ip=<ip>&delay=<seconds>
@@ -15,7 +15,7 @@ Response JSON:
 
 Usage:
 
-  ./util/mock_oauth_server.py --host 127.0.0.1 --port 8085 --delay 1.5
+  ./util/local_auth_test_server.py --host 127.0.0.1 --port 8085 --delay 1.5
 
 """
 
@@ -102,7 +102,7 @@ def main():
 
     Handler.default_delay = args.delay
     server = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f"mock_oauth_server listening on http://{args.host}:{args.port}")
+    print(f"local_http_auth_server listening on http://{args.host}:{args.port}")
     server.serve_forever()
 
 

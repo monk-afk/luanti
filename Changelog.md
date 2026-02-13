@@ -1,6 +1,6 @@
 **AI Disclaimer**
 
-The changes made in this branch (auth-async) were written by Agentic AI (Codex)
+Portions of this branch were authored with the assistance of an agentic AI system (Codex). All changes were reviewed, tested, and integrated by the contributor.
 
 **Engine Changes**
 
@@ -30,14 +30,14 @@ The changes made in this branch (auth-async) were written by Agentic AI (Codex)
 - Builtin auth handler now exposes immediate `begin_auth(...)` pass-through in `luanti/builtin/game/auth.lua:45`
 
 **Test Utilities Added**
-1. Mock OAuth service:
-- `luanti/util/mock_oauth_server.py`
+1. Local HTTP auth test service:
+- `luanti/util/local_auth_test_server.py`
 - Provides predictable allow/deny and delayed responses for timeout and concurrency testing.
 
 2. Async auth test handler mod (under `util/`):
-- `luanti/util/oauth_async_auth_test/init.lua`
-- `luanti/util/oauth_async_auth_test/mod.conf`
-- `luanti/util/oauth_async_auth_test/README.md`
+- `luanti/util/async_auth_test/init.lua`
+- `luanti/util/async_auth_test/mod.conf`
+- `luanti/util/async_auth_test/README.md`
 - Includes structured logging (`log_pending_polls`), async HTTP lookup, caching, and optional remote privilege usage.
 
 **Behavior Notes**
