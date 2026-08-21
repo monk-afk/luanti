@@ -479,7 +479,7 @@ void InventoryList::deSerialize(std::istream &is)
 		}
 		else if(name == "Item")
 		{
-			if(item_i > getSize() - 1)
+			if(item_i >= getSize())
 				throw SerializationError("too many items");
 			ItemStack item;
 			item.deSerialize(iss, m_itemdef);
@@ -487,7 +487,7 @@ void InventoryList::deSerialize(std::istream &is)
 		}
 		else if(name == "Empty")
 		{
-			if(item_i > getSize() - 1)
+			if(item_i >= getSize())
 				throw SerializationError("too many items");
 			m_items[item_i++].clear();
 		} else if (name == "Keep") {
