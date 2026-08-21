@@ -709,3 +709,38 @@ end
 function core.is_nan(number)
 	return number ~= number
 end
+
+
+function core.utf8_truncate(str, max_bytes)
+  if #str <= max_bytes then return str end
+  local start = max_bytes
+
+  -- Find the beginning of the UTF-8 character containing max_bytes.
+  while start > 0 do
+    local byte = str:byte(start)
+    if byte < 0x80 or byte > 0xBF then
+      break
+    end
+    start = start - 1
+  end
+
+  local byte = str:byte(start)
+  local length
+
+  if byte < 0x80 then
+    length = 1
+  elseif byte < 0xE0 then
+    length = 2
+  elseif byte < 0xF0 then
+    length = 3
+  else
+    length = 4
+  end
+
+  -- The character crosses the byte limit: omit it entirely.
+  if start + length - 1 > max_bytes then
+    return str:sub(1, start - 1)
+  end
+
+  return str:sub(1, max_bytes)
+end
