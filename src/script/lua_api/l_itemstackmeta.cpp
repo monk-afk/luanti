@@ -33,7 +33,10 @@ ItemStackMetaRef* ItemStackMetaRef::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, className);
 
-	return *(ItemStackMetaRef**)ud;  // unbox pointer
+	ItemStackMetaRef *obj = *(ItemStackMetaRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 Metadata* ItemStackMetaRef::getmeta(bool auto_create)
@@ -69,8 +72,7 @@ int ItemStackMetaRef::l_set_tool_capabilities(lua_State *L)
 
 // garbage collector
 int ItemStackMetaRef::gc_object(lua_State *L) {
-	ItemStackMetaRef *o = *(ItemStackMetaRef **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<ItemStackMetaRef>(L);
 	return 0;
 }
 

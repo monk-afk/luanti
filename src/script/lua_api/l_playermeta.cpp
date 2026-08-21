@@ -32,7 +32,10 @@ PlayerMetaRef *PlayerMetaRef::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, className);
 
-	return *(PlayerMetaRef **)ud; // unbox pointer
+	PlayerMetaRef *obj = *(PlayerMetaRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 Metadata *PlayerMetaRef::getmeta(bool auto_create)
@@ -53,8 +56,7 @@ void PlayerMetaRef::reportMetadataChange(const std::string *name)
 // garbage collector
 int PlayerMetaRef::gc_object(lua_State *L)
 {
-	PlayerMetaRef *o = *(PlayerMetaRef **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<PlayerMetaRef>(L);
 	return 0;
 }
 

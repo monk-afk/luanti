@@ -84,8 +84,7 @@ int LuaPerlinNoise::create_object(lua_State *L)
 
 int LuaPerlinNoise::gc_object(lua_State *L)
 {
-	LuaPerlinNoise *o = *(LuaPerlinNoise **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaPerlinNoise>(L);
 	return 0;
 }
 
@@ -97,7 +96,10 @@ LuaPerlinNoise *LuaPerlinNoise::checkobject(lua_State *L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud)
 		luaL_typerror(L, narg, className);
-	return *(LuaPerlinNoise **)ud;
+	LuaPerlinNoise *obj = *(LuaPerlinNoise **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 
@@ -341,8 +343,7 @@ int LuaPerlinNoiseMap::create_object(lua_State *L)
 
 int LuaPerlinNoiseMap::gc_object(lua_State *L)
 {
-	LuaPerlinNoiseMap *o = *(LuaPerlinNoiseMap **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaPerlinNoiseMap>(L);
 	return 0;
 }
 
@@ -355,7 +356,10 @@ LuaPerlinNoiseMap *LuaPerlinNoiseMap::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, className);
 
-	return *(LuaPerlinNoiseMap **)ud;
+	LuaPerlinNoiseMap *obj = *(LuaPerlinNoiseMap **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 
@@ -448,8 +452,7 @@ int LuaPseudoRandom::create_object(lua_State *L)
 
 int LuaPseudoRandom::gc_object(lua_State *L)
 {
-	LuaPseudoRandom *o = *(LuaPseudoRandom **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaPseudoRandom>(L);
 	return 0;
 }
 
@@ -460,7 +463,10 @@ LuaPseudoRandom *LuaPseudoRandom::checkobject(lua_State *L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud)
 		luaL_typerror(L, narg, className);
-	return *(LuaPseudoRandom **)ud;
+	LuaPseudoRandom *obj = *(LuaPseudoRandom **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 
@@ -547,8 +553,7 @@ int LuaPcgRandom::create_object(lua_State *L)
 
 int LuaPcgRandom::gc_object(lua_State *L)
 {
-	LuaPcgRandom *o = *(LuaPcgRandom **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaPcgRandom>(L);
 	return 0;
 }
 
@@ -559,7 +564,10 @@ LuaPcgRandom *LuaPcgRandom::checkobject(lua_State *L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud)
 		luaL_typerror(L, narg, className);
-	return *(LuaPcgRandom **)ud;
+	LuaPcgRandom *obj = *(LuaPcgRandom **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 
@@ -662,8 +670,7 @@ int LuaSecureRandom::create_object(lua_State *L)
 
 int LuaSecureRandom::gc_object(lua_State *L)
 {
-	LuaSecureRandom *o = *(LuaSecureRandom **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaSecureRandom>(L);
 	return 0;
 }
 
@@ -674,7 +681,10 @@ LuaSecureRandom *LuaSecureRandom::checkobject(lua_State *L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud)
 		luaL_typerror(L, narg, className);
-	return *(LuaSecureRandom **)ud;
+	LuaSecureRandom *obj = *(LuaSecureRandom **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 

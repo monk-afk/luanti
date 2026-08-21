@@ -74,6 +74,19 @@ public:
 			lua_CFunction func,
 			int top);
 
+	/*
+	 * Lua may retain userdata after __gc has run. Take and clear the owned
+	 * pointer before destroying it so a later access cannot use freed memory.
+	 */
+	template<typename T>
+	static inline T *takeObjectForGC(lua_State *L)
+	{
+		T **ud = reinterpret_cast<T **>(lua_touserdata(L, 1));
+		T *obj = *ud;
+		*ud = nullptr;
+		return obj;
+	}
+
 	/**
 	 * A wrapper for deprecated functions.
 	 *

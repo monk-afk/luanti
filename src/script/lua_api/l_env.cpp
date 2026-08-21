@@ -193,13 +193,15 @@ LuaRaycast *LuaRaycast::checkobject(lua_State *L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud)
 		luaL_typerror(L, narg, className);
-	return *(LuaRaycast **) ud;
+	LuaRaycast *obj = *(LuaRaycast **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 int LuaRaycast::gc_object(lua_State *L)
 {
-	LuaRaycast *o = *(LuaRaycast **) (lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaRaycast>(L);
 	return 0;
 }
 

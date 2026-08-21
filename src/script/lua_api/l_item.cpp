@@ -32,8 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // garbage collector
 int LuaItemStack::gc_object(lua_State *L)
 {
-	LuaItemStack *o = *(LuaItemStack **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaItemStack>(L);
 	return 0;
 }
 
@@ -454,7 +453,11 @@ int LuaItemStack::create(lua_State *L, const ItemStack &item)
 
 LuaItemStack *LuaItemStack::checkobject(lua_State *L, int narg)
 {
-	return *(LuaItemStack **)luaL_checkudata(L, narg, className);
+	LuaItemStack *obj =
+		*(LuaItemStack **)luaL_checkudata(L, narg, className);
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 void LuaItemStack::Register(lua_State *L)

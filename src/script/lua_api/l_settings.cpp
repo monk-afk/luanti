@@ -104,8 +104,7 @@ void LuaSettings::create(lua_State *L, Settings *settings,
 // garbage collector
 int LuaSettings::gc_object(lua_State* L)
 {
-	LuaSettings* o = *(LuaSettings **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaSettings>(L);
 	return 0;
 }
 
@@ -359,7 +358,10 @@ LuaSettings* LuaSettings::checkobject(lua_State* L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud)
 		luaL_typerror(L, narg, className);
-	return *(LuaSettings**) ud;  // unbox pointer
+	LuaSettings *obj = *(LuaSettings **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 const char LuaSettings::className[] = "Settings";

@@ -46,7 +46,10 @@ MetaDataRef* MetaDataRef::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, "MetaDataRef");
 
-	return *(MetaDataRef**)ud;  // unbox pointer
+	MetaDataRef *obj = *(MetaDataRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", "MetaDataRef");
+	return obj;
 }
 
 // Exported functions

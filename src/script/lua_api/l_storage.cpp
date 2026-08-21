@@ -75,10 +75,12 @@ void StorageRef::create(lua_State *L, ModMetadata *object)
 
 int StorageRef::gc_object(lua_State *L)
 {
-	StorageRef *o = *(StorageRef **)(lua_touserdata(L, 1));
+	StorageRef *o = takeObjectForGC<StorageRef>(L);
 	// Server side
-	if (IGameDef *gamedef = getGameDef(L))
-		gamedef->unregisterModStorage(getobject(o)->getModName());
+	if (o) {
+		if (IGameDef *gamedef = getGameDef(L))
+			gamedef->unregisterModStorage(getobject(o)->getModName());
+	}
 	delete o;
 	return 0;
 }
@@ -121,7 +123,10 @@ StorageRef* StorageRef::checkobject(lua_State *L, int narg)
 	luaL_checktype(L, narg, LUA_TUSERDATA);
 	void *ud = luaL_checkudata(L, narg, className);
 	if (!ud) luaL_typerror(L, narg, className);
-	return *(StorageRef**)ud;  // unbox pointer
+	StorageRef *obj = *(StorageRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 ModMetadata* StorageRef::getobject(StorageRef *ref)

@@ -34,7 +34,10 @@ InvRef* InvRef::checkobject(lua_State *L, int narg)
 	luaL_checktype(L, narg, LUA_TUSERDATA);
 	void *ud = luaL_checkudata(L, narg, className);
 	if(!ud) luaL_typerror(L, narg, className);
-	return *(InvRef**)ud;  // unbox pointer
+	InvRef *obj = *(InvRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 Inventory* InvRef::getinv(lua_State *L, InvRef *ref)
@@ -62,8 +65,7 @@ void InvRef::reportInventoryChange(lua_State *L, InvRef *ref)
 
 // garbage collector
 int InvRef::gc_object(lua_State *L) {
-	InvRef *o = *(InvRef **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<InvRef>(L);
 	return 0;
 }
 

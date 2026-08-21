@@ -89,8 +89,7 @@ static int deserialization_helper(lua_State *L, AreaStore *as,
 // garbage collector
 int LuaAreaStore::gc_object(lua_State *L)
 {
-	LuaAreaStore *o = *(LuaAreaStore **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaAreaStore>(L);
 	return 0;
 }
 
@@ -348,7 +347,10 @@ LuaAreaStore *LuaAreaStore::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, className);
 
-	return *(LuaAreaStore **)ud;  // unbox pointer
+	LuaAreaStore *obj = *(LuaAreaStore **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 void LuaAreaStore::Register(lua_State *L)

@@ -121,8 +121,7 @@ void ModChannelRef::create(lua_State *L, const std::string &channel)
 
 int ModChannelRef::gc_object(lua_State *L)
 {
-	ModChannelRef *o = *(ModChannelRef **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<ModChannelRef>(L);
 	return 0;
 }
 
@@ -134,7 +133,10 @@ ModChannelRef *ModChannelRef::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, className);
 
-	return *(ModChannelRef **)ud; // unbox pointer
+	ModChannelRef *obj = *(ModChannelRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 ModChannel *ModChannelRef::getobject(lua_State *L, ModChannelRef *ref)

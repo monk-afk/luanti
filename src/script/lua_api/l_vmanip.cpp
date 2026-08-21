@@ -33,8 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // garbage collector
 int LuaVoxelManip::gc_object(lua_State *L)
 {
-	LuaVoxelManip *o = *(LuaVoxelManip **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<LuaVoxelManip>(L);
 
 	return 0;
 }
@@ -426,7 +425,10 @@ LuaVoxelManip *LuaVoxelManip::checkobject(lua_State *L, int narg)
 	if (!ud)
 		luaL_typerror(L, narg, className);
 
-	return *(LuaVoxelManip **)ud;  // unbox pointer
+	LuaVoxelManip *obj = *(LuaVoxelManip **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 void LuaVoxelManip::Register(lua_State *L)

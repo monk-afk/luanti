@@ -24,8 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 int NodeTimerRef::gc_object(lua_State *L) {
-	NodeTimerRef *o = *(NodeTimerRef **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<NodeTimerRef>(L);
 	return 0;
 }
 
@@ -34,7 +33,10 @@ NodeTimerRef* NodeTimerRef::checkobject(lua_State *L, int narg)
 	luaL_checktype(L, narg, LUA_TUSERDATA);
 	void *ud = luaL_checkudata(L, narg, className);
 	if(!ud) luaL_typerror(L, narg, className);
-	return *(NodeTimerRef**)ud;  // unbox pointer
+	NodeTimerRef *obj = *(NodeTimerRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 int NodeTimerRef::l_set(lua_State *L)

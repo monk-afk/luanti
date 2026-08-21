@@ -46,7 +46,10 @@ ObjectRef* ObjectRef::checkobject(lua_State *L, int narg)
 	void *ud = luaL_checkudata(L, narg, className);
 	if (ud == nullptr)
 		luaL_typerror(L, narg, className);
-	return *(ObjectRef**)ud;  // unbox pointer
+	ObjectRef *obj = *(ObjectRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 ServerActiveObject* ObjectRef::getobject(ObjectRef *ref)
@@ -89,8 +92,7 @@ RemotePlayer *ObjectRef::getplayer(ObjectRef *ref)
 
 // garbage collector
 int ObjectRef::gc_object(lua_State *L) {
-	ObjectRef *obj = *(ObjectRef **)(lua_touserdata(L, 1));
-	delete obj;
+	delete takeObjectForGC<ObjectRef>(L);
 	return 0;
 }
 

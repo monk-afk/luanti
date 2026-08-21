@@ -34,7 +34,10 @@ NodeMetaRef* NodeMetaRef::checkobject(lua_State *L, int narg)
 	luaL_checktype(L, narg, LUA_TUSERDATA);
 	void *ud = luaL_checkudata(L, narg, className);
 	if(!ud) luaL_typerror(L, narg, className);
-	return *(NodeMetaRef**)ud;  // unbox pointer
+	NodeMetaRef *obj = *(NodeMetaRef **)ud;
+	if (!obj)
+		luaL_error(L, "Object of type %s has been deleted already", className);
+	return obj;
 }
 
 Metadata* NodeMetaRef::getmeta(bool auto_create)
@@ -77,8 +80,7 @@ void NodeMetaRef::reportMetadataChange(const std::string *name)
 
 // garbage collector
 int NodeMetaRef::gc_object(lua_State *L) {
-	NodeMetaRef *o = *(NodeMetaRef **)(lua_touserdata(L, 1));
-	delete o;
+	delete takeObjectForGC<NodeMetaRef>(L);
 	return 0;
 }
 
