@@ -322,7 +322,14 @@ void IMoveAction::apply(InventoryManager *mgr, ServerActiveObject *player, IGame
 		return;
 	}
 
-	if ((u16)to_i > list_to->getSize()) {
+	if (from_i < 0 || list_from->getSize() <= (u32)from_i) {
+		infostream << "IMoveAction::apply(): FAIL: source index out of bounds: "
+			<< "from_i=" << from_i
+			<< ", size=" << list_from->getSize() << std::endl;
+		return;
+	}
+
+	if (to_i < 0 || list_to->getSize() <= (u32)to_i) {
 		infostream << "IMoveAction::apply(): FAIL: destination index out of bounds: "
 			<< "to_i=" << to_i
 			<< ", size=" << list_to->getSize() << std::endl;
@@ -988,4 +995,3 @@ bool getCraftingResult(Inventory *inv, ItemStack &result,
 
 	return found;
 }
-
