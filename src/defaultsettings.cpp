@@ -482,6 +482,7 @@ void set_default_settings()
 
 	// Server list announcing
 	settings->setDefault("server_announce", "false");
+	settings->setDefault("server_announce_send_players", "false");
 	settings->setDefault("server_url", "");
 	settings->setDefault("server_address", "");
 	settings->setDefault("server_name", "");
