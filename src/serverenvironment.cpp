@@ -1185,22 +1185,10 @@ void ServerEnvironment::clearObjects(ClearObjectsMode mode)
 		// Delete static object if block is loaded
 		deleteStaticFromBlock(obj, id, MOD_REASON_CLEAR_ALL_OBJECTS, true);
 
-		// If known by some client, don't delete immediately
-		if (obj->m_known_by_count > 0) {
-			obj->markForRemoval();
-			return false;
-		}
-
-		// Tell the object about removal
-		obj->removingFromEnvironment();
-		// Deregister in scripting api
-		m_script->removeObjectReference(obj);
-
-		// Delete active object
-		if (obj->environmentDeletes())
-			delete obj;
-
-		return true;
+		// Defer destruction until normal removed-object cleanup. Lua or C++
+		// callbacks may still hold borrowed pointers to this object.
+		obj->markForRemoval();
+		return false;
 	};
 
 	m_ao_manager.clear(cb_removal);

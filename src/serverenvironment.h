@@ -190,7 +190,7 @@ enum ClearObjectsMode {
 	// Load and go through every mapblock, clearing objects
 		CLEAR_OBJECTS_MODE_FULL,
 
-	// Clear objects immediately in loaded mapblocks;
+	// Mark active objects for removal and clear objects in loaded mapblocks;
 	// clear objects in unloaded mapblocks only when the mapblocks are next activated.
 		CLEAR_OBJECTS_MODE_QUICK,
 };

@@ -466,6 +466,9 @@ void Map::timerUpdate(float dtime, float unload_timeout, u32 max_loaded_blocks,
 	// Finally delete the empty sectors
 	deleteSectors(sector_deletion_queue);
 
+	// Callback users of removed metadata have unwound by this point.
+	m_metadata_trash.clear();
+
 	if(deleted_blocks_count != 0)
 	{
 		PrintInfo(infostream); // ServerMap/ClientMap:
@@ -989,7 +992,10 @@ bool Map::setNodeMetadata(v3s16 p, NodeMetadata *meta)
 				<<std::endl;
 		return false;
 	}
-	block->m_node_metadata.set(p_rel, meta);
+	std::unique_ptr<NodeMetadata> oldmeta =
+		block->m_node_metadata.set(p_rel, meta);
+	if (oldmeta)
+		m_metadata_trash.emplace_back(std::move(oldmeta));
 	return true;
 }
 
@@ -1004,7 +1010,10 @@ void Map::removeNodeMetadata(v3s16 p)
 				<<std::endl;
 		return;
 	}
-	block->m_node_metadata.remove(p_rel);
+	std::unique_ptr<NodeMetadata> oldmeta =
+		block->m_node_metadata.remove(p_rel);
+	if (oldmeta)
+		m_metadata_trash.emplace_back(std::move(oldmeta));
 }
 
 NodeTimer Map::getNodeTimer(v3s16 p)

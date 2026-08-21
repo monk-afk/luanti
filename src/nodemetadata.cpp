@@ -225,20 +225,22 @@ NodeMetadata *NodeMetadataList::get(v3s16 p)
 	return n->second;
 }
 
-void NodeMetadataList::remove(v3s16 p)
+std::unique_ptr<NodeMetadata> NodeMetadataList::remove(v3s16 p)
 {
 	NodeMetadata *olddata = get(p);
 	if (olddata) {
-		if (m_is_metadata_owner)
-			delete olddata;
 		m_data.erase(p);
+		if (m_is_metadata_owner)
+			return std::unique_ptr<NodeMetadata>(olddata);
 	}
+	return nullptr;
 }
 
-void NodeMetadataList::set(v3s16 p, NodeMetadata *d)
+std::unique_ptr<NodeMetadata> NodeMetadataList::set(v3s16 p, NodeMetadata *d)
 {
-	remove(p);
+	std::unique_ptr<NodeMetadata> olddata = remove(p);
 	m_data.emplace(p, d);
+	return olddata;
 }
 
 void NodeMetadataList::clear()

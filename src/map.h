@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <set>
 #include <map>
 #include <list>
+#include <memory>
+#include <vector>
 
 #include "irrlichttypes_bloated.h"
 #include "mapnode.h"
@@ -291,6 +293,9 @@ protected:
 
 	// This stores the properties of the nodes on the map.
 	const NodeDefManager *m_nodedef;
+
+	// Metadata removed during callbacks is destroyed at a later safe point.
+	std::vector<std::unique_ptr<NodeMetadata>> m_metadata_trash;
 
 	bool determineAdditionalOcclusionCheck(const v3s16 &pos_camera,
 		const core::aabbox3d<s16> &block_bounds, v3s16 &check);

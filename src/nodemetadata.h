@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include <memory>
 #include <unordered_set>
 #include "metadata.h"
 
@@ -91,10 +92,10 @@ public:
 	std::vector<v3s16> getAllKeys();
 	// Get pointer to data
 	NodeMetadata *get(v3s16 p);
-	// Deletes data
-	void remove(v3s16 p);
-	// Deletes old data and sets a new one
-	void set(v3s16 p, NodeMetadata *d);
+	// Removes data and returns its ownership when this list owns metadata
+	std::unique_ptr<NodeMetadata> remove(v3s16 p);
+	// Sets new data and returns ownership of the replaced metadata
+	std::unique_ptr<NodeMetadata> set(v3s16 p, NodeMetadata *d);
 	// Deletes all
 	void clear();
 
