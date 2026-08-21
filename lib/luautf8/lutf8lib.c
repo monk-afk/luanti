@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
 
 #include "unidata.h"
 
@@ -1297,4 +1298,3 @@ LUALIB_API int luaopen_utf8 (lua_State *L) {
  * win32cc: run='lua.exe test.lua'
  * maccc: run='lua -- test_compat.lua'
  * maccc: flags+='-g --coverage -bundle -undefined dynamic_lookup' output='lua-utf8.so' */
-
