@@ -27,7 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <json/json.h>
 #include "convert_json.h"
 #include "httpfetch.h"
-#include "util/base64.h"
 
 namespace ServerList
 {
@@ -92,7 +91,8 @@ void sendAnnounce(AnnounceAction action,
 			for (const std::string &clients_name : clients_names)
 				server["clients_list"].append(clients_name);
 		}
-		server["gameid"]       = "MultiCraft";
+		if (!gameid.empty())
+			server["gameid"] = gameid;
 	}
 
 	if (action == AA_START) {
@@ -112,8 +112,6 @@ void sendAnnounce(AnnounceAction action,
 
 	const std::string json = fastWriteJson(server);
 	sendAnnounceInner(action, json, g_settings->get("serverlist_url"));
-	if (g_settings->getBool("announce_mt"))
-		sendAnnounceInner(action, json, base64_decode("c2VydmVycy5taW5ldGVzdC5uZXQ"));
 }
 #endif
 

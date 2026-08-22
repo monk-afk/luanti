@@ -1035,10 +1035,7 @@ server_url (Server URL) string https://minetest.net
 server_announce (Announce server) bool false
 
 #    Announce to this serverlist.
-serverlist_url (Serverlist URL) string servers.multicraft.world
-
-#    Announce to MT serverlist.
-# announce_mt (Announce to MT) bool true
+serverlist_url (Serverlist URL) string https://servers.luanti.org
 
 #    Remove color codes from incoming chat messages
 #    Use this to stop players from being able to use color in their messages

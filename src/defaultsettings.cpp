@@ -44,7 +44,7 @@ void set_default_settings()
 	settings->setDefault("language", "");
 	settings->setDefault("name", "");
 	settings->setDefault("bind_address", "");
-	settings->setDefault("serverlist_url", "servers.multicraft.world");
+	settings->setDefault("serverlist_url", "https://servers.luanti.org");
 
 	// Client
 	settings->setDefault("address", "");
@@ -374,7 +374,6 @@ void set_default_settings()
 	settings->setDefault("disable_texture_packs", "false");
 	settings->setDefault("disable_escape_sequences", "false");
 	settings->setDefault("strip_color_codes", "true");
-	settings->setDefault("announce_mt", "true");
 #if USE_PROMETHEUS
 	settings->setDefault("prometheus_listener_address", "127.0.0.1:30000");
 #endif
