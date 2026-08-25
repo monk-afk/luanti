@@ -250,6 +250,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v6
+        with:
+          path: '${{ github.workspace }}\vcpkg_cache'
+          key: vcpkg-${{ runner.os }}-${{ matrix.config.vcpkg_triplet }}-${{ env.VCPKG_VERSION }}-${{ hashFiles('.github/workflows/build.yml') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-${{ matrix.config.vcpkg_triplet }}-${{ env.VCPKG_VERSION }}-
+
       - name: Set up vcpkg
         uses: lukka/run-vcpkg@v11
         with:
@@ -262,6 +270,7 @@ jobs:
           & "$env:VCPKG_ROOT\vcpkg.exe" install @packages --triplet $env:VCPKG_DEFAULT_TRIPLET
         env:
           VCPKG_DEFAULT_TRIPLET: ${{ matrix.config.vcpkg_triplet }}
+          VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}\vcpkg_cache,readwrite
 
       - name: CMake
         run: |
