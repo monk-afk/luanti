@@ -16,11 +16,11 @@ jobs:
     name: "Builtin Luacheck and Unit Tests"
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - uses: leafo/gh-actions-lua@v9
+    - uses: actions/checkout@v7
+    - uses: leafo/gh-actions-lua@v13
       with:
         luaVersion: "5.1.5"
-    - uses: leafo/gh-actions-luarocks@v4
+    - uses: leafo/gh-actions-luarocks@v6
 
     - name: Install luarocks tools
       run: |

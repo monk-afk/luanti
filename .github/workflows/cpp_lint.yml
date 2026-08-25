@@ -27,7 +27,7 @@ jobs:
   clang_format:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Install clang-format
         run: |
           sudo apt-get install clang-format-11 -qyy
@@ -42,7 +42,7 @@ jobs:
   clang_tidy:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Install deps
       run: |
         sudo apt-get install clang-tidy-11 -qyy
