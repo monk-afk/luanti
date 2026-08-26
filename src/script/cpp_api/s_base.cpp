@@ -38,8 +38,8 @@ extern "C" {
 #if USE_LUAJIT
 	#include "luajit.h"
 #endif
-LUALIB_API int luaopen_utf8(lua_State *L);
-LUALIB_API int luaopen_chacha(lua_State *L);
+int luaopen_utf8(lua_State *L);
+int luaopen_chacha(lua_State *L);
 }
 
 #include <cstdio>
