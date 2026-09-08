@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 echo
-echo "Starting build MultiCraft for Windows..."
+echo "Starting build SquareOne Core for Windows..."
 
 echo
 echo "Build Libraries:"

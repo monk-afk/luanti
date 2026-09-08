@@ -357,7 +357,7 @@ void loadGameConfAndInitWorld(const std::string &path, const std::string &name,
 	}
 
 	getGameMinetestConfig(gamespec.path, *game_settings, "minetest.conf");
-	getGameMinetestConfig(gamespec.path, *game_settings, "multicraft.conf");
+	getGameMinetestConfig(gamespec.path, *game_settings, "squareone.conf");
 	game_settings->removeSecureSettings();
 
 	infostream << "Initializing world at " << final_path << std::endl;

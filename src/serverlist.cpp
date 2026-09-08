@@ -74,7 +74,8 @@ void sendAnnounce(AnnounceAction action,
 		server["name"]         = g_settings->get("server_name");
 		server["description"]  = g_settings->get("server_description");
 		server["version"]      = g_version_string;
-		server["server_id"]    = PROJECT_NAME;
+		// Keep the server-list compatibility identity independent of branding.
+		server["server_id"]    = "minetest";
 		server["proto_min"]    = strict_checking ? LATEST_PROTOCOL_VERSION : (proto_compat ? SERVER_PROTOCOL_VERSION_MIN : SERVER_PROTOCOL_VERSION_MIN_NOCOMPAT);
 		server["proto_max"]    = strict_checking ? LATEST_PROTOCOL_VERSION : SERVER_PROTOCOL_VERSION_MAX;
 		server["url"]          = g_settings->get("server_url");

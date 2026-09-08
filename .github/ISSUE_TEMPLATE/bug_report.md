@@ -6,9 +6,9 @@ labels: Unconfirmed bug
 assignees: ''
 ---
 
-##### MultiCraft version
+##### SquareOne Core version
 <!--
-Paste MultiCraft version between quotes below
+Paste SquareOne Core version between quotes below
 If you are on a devel version, please add git commit hash
 You can use `minetest --version` to find it.
 -->

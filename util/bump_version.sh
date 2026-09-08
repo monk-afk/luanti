@@ -29,10 +29,10 @@ perform_release() {
  	sed -i 's/project.ext.set("developmentBuild", 1)/project.ext.set("developmentBuild", 0)/' android/build.gradle
 	sed -i -re "s/\"versionCode\", [0-9]+/\"versionCode\", $NEW_ANDROID_VERSION_CODE/" build/android/build.gradle
 
-	sed -i '/\<release/s/\(version\)="[^"]*"/\1="'"$RELEASE_VERSION"'"/' misc/net.minetest.minetest.appdata.xml
-	sed -i 's/\(<release date\)="[^"]*"/\1="'"$RELEASE_DATE"'"/' misc/net.minetest.minetest.appdata.xml
+	sed -i '/\<release/s/\(version\)="[^"]*"/\1="'"$RELEASE_VERSION"'"/' misc/io.github.monk_afk.squareone.metainfo.xml
+	sed -i 's/\(<release date\)="[^"]*"/\1="'"$RELEASE_DATE"'"/' misc/io.github.monk_afk.squareone.metainfo.xml
 
-	git add -f CMakeLists.txt build/android/build.gradle misc/net.minetest.minetest.appdata.xml
+	git add -f CMakeLists.txt build/android/build.gradle misc/io.github.monk_afk.squareone.metainfo.xml
 
 	git commit -m "Bump version to $RELEASE_VERSION"
 

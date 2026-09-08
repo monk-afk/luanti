@@ -1,7 +1,7 @@
 #!/bin/bash
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 gameid=devtest
-minetest=$dir/../bin/minetest
+minetest=$dir/../bin/squareone
 testspath=$dir/../tests
 worldpath=$testspath/testworld_$gameid
 configpath=$testspath/configs
@@ -40,4 +40,3 @@ viewing_range_nodes_min=10
 echo $(sleep 1; $minetest --disable-unittests --logfile $log_client1 --config $conf_client1 --go --address localhost) &
 echo $(sleep 2; $minetest --disable-unittests --logfile $log_client2 --config $conf_client2 --go --address localhost) &
 $minetest --disable-unittests --server --logfile $log_server --config $conf_server --world $worldpath --gameid $gameid
-

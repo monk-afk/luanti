@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
 # This can be read from ${PROJECT_NAME} after project() is called
-project(multicraft)
-set(PROJECT_NAME_CAPITALIZED "MultiCraft")
+project(squareone)
+set(PROJECT_NAME_CAPITALIZED "SquareOne Core")
+set(PROJECT_PACKAGE_NAME "squareone-core")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -10,15 +11,15 @@ set(GCC_MINIMUM_VERSION "5.1")
 set(CLANG_MINIMUM_VERSION "3.5")
 
 # Also remember to set PROTOCOL_VERSION in network/networkprotocol.h when releasing
-set(VERSION_MAJOR 2)
+set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 6)
-set(VERSION_EXTRA "S1" CACHE STRING "Stuff to append to version string")
+set(VERSION_PATCH 0)
+set(VERSION_EXTRA "" CACHE STRING "Stuff to append to version string")
 
 # Change to false for releases
 set(DEVELOPMENT_BUILD FALSE)
 
-set(ENABLE_UPDATE_CHECKER (NOT ${DEVELOPMENT_BUILD}) CACHE BOOL
+set(ENABLE_UPDATE_CHECKER FALSE CACHE BOOL
 	"Whether to enable update checks by default")
 
 set(VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
@@ -184,16 +185,20 @@ install(FILES "doc/client_lua_api.txt" DESTINATION "${DOCDIR}" COMPONENT "Docs")
 install(FILES "doc/menu_lua_api.txt" DESTINATION "${DOCDIR}" COMPONENT "Docs")
 install(FILES "doc/texture_packs.txt" DESTINATION "${DOCDIR}" COMPONENT "Docs")
 install(FILES "doc/world_format.txt" DESTINATION "${DOCDIR}" COMPONENT "Docs")
-install(FILES "multicraft.conf.example" DESTINATION "${EXAMPLE_CONF_DIR}")
+install(FILES "squareone.conf.example" DESTINATION "${EXAMPLE_CONF_DIR}")
 
 if(UNIX AND NOT APPLE)
-	install(FILES "doc/minetest.6" "doc/minetestserver.6" DESTINATION "${MANDIR}/man6")
-	install(FILES "misc/net.minetest.minetest.desktop" DESTINATION "${XDG_APPS_DIR}")
-	install(FILES "misc/net.minetest.minetest.appdata.xml" DESTINATION "${APPDATADIR}")
-	install(FILES "misc/minetest.svg" DESTINATION "${ICONDIR}/hicolor/scalable/apps")
-	install(FILES "misc/multicraft-xorg-icon-128.png"
+	install(FILES "doc/squareone.6" "doc/squareoneserver.6" DESTINATION "${MANDIR}/man6")
+	install(FILES "misc/io.github.monk_afk.squareone.desktop" DESTINATION "${XDG_APPS_DIR}")
+	install(FILES "misc/io.github.monk_afk.squareone.metainfo.xml" DESTINATION "${APPDATADIR}")
+	install(FILES "misc/minetest.svg" DESTINATION "${ICONDIR}/hicolor/scalable/apps"
+		RENAME "squareone.svg")
+	install(FILES "misc/squareone-xorg-icon-128.png"
 		DESTINATION "${ICONDIR}/hicolor/128x128/apps"
-		RENAME "multicraft.png")
+		RENAME "squareone.png")
+	if(RUN_IN_PLACE)
+		install(FILES "misc/squareone-xorg-icon-128.png" DESTINATION "${SHAREDIR}/misc")
+	endif()
 endif()
 
 if(APPLE)
@@ -238,14 +243,14 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A free open-source voxel game engine with
 set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
-set(CPACK_PACKAGE_VENDOR "celeron55")
-set(CPACK_PACKAGE_CONTACT "Perttu Ahola <celeron55@gmail.com>")
+set(CPACK_PACKAGE_NAME "${PROJECT_PACKAGE_NAME}")
+set(CPACK_PACKAGE_VENDOR "SquareOne Core contributors")
 
 include(CPackComponent)
 
 cpack_add_component(Docs
 	DISPLAY_NAME "Documentation"
-	DESCRIPTION "Documentation about Minetest and Minetest modding"
+	DESCRIPTION "Documentation about SquareOne Core and Minetest-compatible modding"
 )
 
 cpack_add_component(SUBGAME_MINETEST_GAME
@@ -262,7 +267,7 @@ cpack_add_component(SUBGAME_MINIMAL
 )
 
 cpack_add_component_group(Subgames
-	DESCRIPTION "Games for the Minetest engine."
+	DESCRIPTION "Games for SquareOne Core."
 )
 
 if(WIN32)
@@ -271,9 +276,9 @@ if(WIN32)
 
 	if(RUN_IN_PLACE)
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win64")
+			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_PACKAGE_NAME}-${VERSION_STRING}-win64")
 		else()
-			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win32")
+			set(CPACK_PACKAGE_FILE_NAME "${PROJECT_PACKAGE_NAME}-${VERSION_STRING}-win32")
 		endif()
 
 		set(CPACK_GENERATOR ZIP)
@@ -286,7 +291,7 @@ if(WIN32)
 		set(CPACK_CREATE_DESKTOP_LINKS ${PROJECT_NAME})
 		set(CPACK_PACKAGING_INSTALL_PREFIX "/${PROJECT_NAME_CAPITALIZED}")
 
-		set(CPACK_WIX_PRODUCT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/misc/multicraft-icon.ico")
+		set(CPACK_WIX_PRODUCT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/misc/squareone-icon.ico")
 		# Supported languages can be found at
 		# http://wixtoolset.org/documentation/manual/v3/wixui/wixui_localization.html
 		#set(CPACK_WIX_CULTURES "ar-SA,bg-BG,ca-ES,hr-HR,cs-CZ,da-DK,nl-NL,en-US,et-EE,fi-FI,fr-FR,de-DE")
@@ -299,17 +304,17 @@ if(WIN32)
 		# and install the appropriate one.
 		# CMake does not support that, so there are two separate GUID's
 		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(CPACK_WIX_UPGRADE_GUID "745A0FB3-5552-44CA-A587-A91C397CCC56")
+			set(CPACK_WIX_UPGRADE_GUID "AC81E261-B797-49D3-8BDB-B24F9AC6BE62")
 		else()
-			set(CPACK_WIX_UPGRADE_GUID "814A2E2D-2779-4BBD-9ACD-FC3BD51FBBA2")
+			set(CPACK_WIX_UPGRADE_GUID "439FFC1A-A6D0-48EC-B897-D2F1A29661BF")
 		endif()
 	endif()
 elseif(APPLE)
 	set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
-	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-osx")
+	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_PACKAGE_NAME}-${VERSION_STRING}-osx")
 	set(CPACK_GENERATOR ZIP)
 else()
-	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-linux")
+	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_PACKAGE_NAME}-${VERSION_STRING}-linux")
 	set(CPACK_GENERATOR TGZ)
 	set(CPACK_SOURCE_GENERATOR TGZ)
 endif()

@@ -46,7 +46,7 @@ jobs:
 #
 #      - name: Test
 #        run: |
-#          ./bin/multicraft --run-unittests
+#          ./bin/squareone --run-unittests
 
   # This is the current gcc compiler (available in jammy)
   gcc_10:
@@ -67,7 +67,7 @@ jobs:
 
       - name: Test
         run: |
-          ./bin/multicraft --run-unittests
+          ./bin/squareone --run-unittests
 
   # This is our minor clang compiler
 #  clang_3_9:
@@ -89,7 +89,7 @@ jobs:
 #
 #      - name: Test
 #        run: |
-#          ./bin/multicraft --run-unittests
+#          ./bin/squareone --run-unittests
 
   # This is the current clang version
   clang_11:
@@ -111,11 +111,11 @@ jobs:
 
       - name: Test
         run: |
-          ./bin/multicraft --run-unittests
+          ./bin/squareone --run-unittests
 
 #     - name: Valgrind
 #       run: |
-#         valgrind --leak-check=full --leak-check-heuristics=all --undef-value-errors=no --error-exitcode=9 ./bin/multicraft --run-unittests
+#         valgrind --leak-check=full --leak-check-heuristics=all --undef-value-errors=no --error-exitcode=9 ./bin/squareone --run-unittests
 
   # Build with prometheus-cpp (server-only)
 #  clang_9_prometheus:
@@ -143,7 +143,7 @@ jobs:
 #
 #      - name: Test
 #        run: |
-#          ./bin/multicraftserver --run-unittests
+#          ./bin/squareoneserver --run-unittests
 
   # Build without freetype (client-only)
 #  clang_9_no_freetype:
@@ -167,7 +167,7 @@ jobs:
 #
 #      - name: Test
 #        run: |
-#          ./bin/multicraft --run-unittests
+#          ./bin/squareone --run-unittests
 
   docker:
     name: "Docker image"
@@ -259,5 +259,5 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: MultiCraft-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
+          name: squareone-core-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
           path: .\Package\

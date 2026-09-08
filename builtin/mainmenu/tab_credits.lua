@@ -121,22 +121,21 @@ return {
 		local logofile = defaulttexturedir_esc .. "logo.png"
 		local fs = "image[-0.25,-0.3;2,2;" .. logofile .. "]" ..
 			"label[1.3,-0.25;" ..
-			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
-			"Copyright (C) 2014–" .. os.date("%Y") .. " MultiCraft Development Team\n" ..
-			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
-			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
+			"SquareOne Core, ver. " .. version.string .. "\n" ..
+			"Based on MultiCraft 2.0.6 and Minetest 5.4.1\n" ..
+			"Copyright (C) 2014–2023 MultiCraft Development Team\n" ..
+			"License: GNU LGPLv3.0+ and CC BY-SA 4.0]" ..
 
 			btn_style("homepage") ..
 			"image_button[9.5,-0.2;2.6,0.85;;homepage;Home Page;true;false]" ..
-			btn_style("privacy") ..
-			"image_button[9.5,0.6;2.6,0.85;;privacy;Privacy Policy;true;false]" ..
-
 			"background9[0,1.5;12,4.2;" .. defaulttexturedir_esc ..
 				"worldlist_bg.png;false;40]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
 			scrollbar_style("list_credits") ..
 			"table[0,1.5;11.75,4.05;list_credits;" ..
+			"#FFFF00," .. fgettext("Active Contributors") .. " (SquareOne Core),," ..
+			buildCreditList({"monk-afk"}) .. ",,," ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (MultiCraft),," ..
 			buildCreditList(multicraft_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (Minetest Engine),," ..
@@ -159,10 +158,7 @@ return {
 	end,
 	cbf_button_handler = function(this, fields, name, tabdata)
 		if fields.homepage then
-			core.open_url("https://multicraft.world")
-		end
-		if fields.privacy then
-			core.open_url("https://multicraft.world/privacy")
+			core.open_url("https://github.com/monk-afk/luanti")
 		end
 
 	--[[if fields.userdata then

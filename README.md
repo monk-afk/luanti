@@ -1,19 +1,18 @@
-MultiCraft Open Source
-======================
+SquareOne Core
+==============
 
-![Build Status](https://github.com/MultiCraft/MultiCraft2/workflows/build/badge.svg)
+![Build Status](https://github.com/monk-afk/luanti/actions/workflows/build.yml/badge.svg?branch=squareone-core)
 [![License](https://img.shields.io/badge/license-LGPLv3.0%2B-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/license-CC_BY--SA_4.0-orange.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-MultiCraft Open Source is a free open-source voxel game engine with easy modding and game creation.
+SquareOne Core (S1) is a free open-source voxel game engine with support for Minetest 0.4 and 5.x clients.
 
-MultiCraft is based on the Minetest project, which is developed by a [number of contributors](https://github.com/minetest/minetest/graphs/contributors).
+Packages use the name `squareone-core`; the client and dedicated server executables
+are `squareone` and `squareoneserver`. The source repository is currently
+[monk-afk/luanti](https://github.com/monk-afk/luanti/tree/squareone-core), on the `squareone-core` branch.
 
-Copyright © 2014-2023 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me> & MultiCraft Development Team.
-
-[![License](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://jb.gg/OpenSourceSupport)
-
-Special thanks to JetBrains for their support of our community!
+SquareOne Core is based on [MultiCraft 2.0.6](https://github.com/MultiCraft/MultiCraft/releases#release-2.0.6)
+which is based on [Minetest 5.4.1](https://github.com/luanti-org/luanti/tree/5.4.1).
 
 Table of Contents
 ------------------
@@ -95,29 +94,37 @@ Where each location is on each platform:
     * `share` = `.`
     * `user`  = `.`
 * Windows installed:
-    * `bin`   = `C:\Program Files\MultiCraft\bin (Depends on the install location)`
-    * `share` = `C:\Program Files\MultiCraft (Depends on the install location)`
-    * `user`  = `%APPDATA%\MultiCraft`
+    * `bin`   = `C:\Program Files\SquareOne Core\bin (Depends on the install location)`
+    * `share` = `C:\Program Files\SquareOne Core (Depends on the install location)`
+    * `user`  = `%APPDATA%\SquareOne Core`
 * Linux installed:
     * `bin`   = `/usr/bin`
-    * `share` = `/usr/share/multicraft`
-    * `user`  = `~/.multicraft`
+    * `share` = `/usr/share/squareone`
+    * `user`  = `~/.squareone`
 * macOS:
     * `bin`   = `Contents/MacOS`
     * `share` = `Contents/Resources`
-    * `user`  = `Contents/User OR ~/Library/Application Support/multicraft`
+    * `user`  = `Contents/User OR ~/Library/Application Support/squareone`
 
 Worlds can be found as separate folders in: `user/worlds/`
 
 Configuration file
 ------------------
 - Default location:
-    `user/multicraft.conf`
-- This file is created by closing MultiCraft for the first time.
+    `user/squareone.conf`
+- This file is created when the client saves its settings.
 - A specific file can be specified on the command line:
     `--config <path-to-file>`
-- A run-in-place build will look for the configuration file in
-    `location_of_exe/../multicraft.conf` and also `location_of_exe/../../multicraft.conf`
+- Configuration discovery searches the user-data directory, then its parent.
+  Run-in-place builds also search the grandparent directory.
+- If `squareone.conf` is absent from all these locations, `minetest.conf` is tried
+  in the same order. The selected file is used when settings are saved.
+- Game defaults load `minetest.conf` first, then overlay `squareone.conf`.
+- No MultiCraft configuration or user-data directories are discovered automatically.
+
+Server-list announcements use `server_id = "minetest"` for compatibility.
+Executable aliases are not installed. Automatic update checks are disabled until
+a SquareOne update feed is configured.
 
 Command-line options
 --------------------
@@ -169,14 +176,14 @@ For Fedora users:
 
 Download source (this is the URL to the latest of source repository, which might not work at all times) using Git:
 
-    git clone --depth 1 https://github.com/MultiCraft/MultiCraft.git
-    cd MultiCraft
+    git clone --depth 1 --branch multicraft-2.0.6 https://github.com/monk-afk/luanti.git squareone-core
+    cd squareone-core
 
 Download source, without using Git:
 
-    wget https://github.com/MultiCraft/MultiCraft/archive/main.tar.gz
-    tar xf main.tar.gz
-    cd MultiCraft-main
+    wget -O squareone-core.tar.gz https://github.com/monk-afk/luanti/archive/refs/heads/multicraft-2.0.6.tar.gz
+    tar xf squareone-core.tar.gz
+    cd luanti-multicraft-2.0.6
 
 #### Build
 
@@ -187,7 +194,7 @@ Build a version that runs directly from the source directory:
 
 Run it:
 
-    ./bin/multicraft
+    ./bin/squareone
 
 - Use `cmake . -LH` to see all CMake options and their current state.
 - If you want to install it system-wide (or are making a distribution package),
@@ -203,8 +210,8 @@ Run it:
 
 General options and their default values:
 
-    BUILD_CLIENT=TRUE          - Build MultiCraft client
-    BUILD_SERVER=FALSE         - Build MultiCraft server
+    BUILD_CLIENT=TRUE          - Build SquareOne Core client
+    BUILD_SERVER=FALSE         - Build SquareOne Core server
     BUILD_UNITTESTS=TRUE       - Build unittest sources
     CMAKE_BUILD_TYPE=Release   - Type of build (Release vs. Debug)
         Release                - Release build
@@ -230,7 +237,7 @@ General options and their default values:
     RUN_IN_PLACE=FALSE         - Create a portable install (worlds, settings etc. in current directory)
     ENABLE_UPDATE_CHECKER=TRUE - Whether to enable update checks by default
     USE_GPROF=FALSE            - Enable profiling using GProf
-    VERSION_EXTRA=             - Text to append to version (e.g. VERSION_EXTRA=foobar -> MultiCraft 0.4.9-foobar)
+    VERSION_EXTRA=S1           - Text to append to version (e.g. VERSION_EXTRA=S1 -> SquareOne Core 2.0.6-S1)
     ENABLE_TOUCH=FALSE         - Enable Touchscreen support (requires support by IrrlichtMt)
 
 Library specific options:
@@ -320,12 +327,12 @@ Use `--triplet` to specify the target triplet, e.g. `x64-windows` or `x86-window
 
 This is outdated and not recommended. Follow the instructions on https://dev.minetest.net/Build_Win32_Minetest_including_all_required_libraries#VS2012_Build
 
-### Compile MultiCraft
+### Compile SquareOne Core
 
 #### a) Using the vcpkg toolchain and CMake GUI
 1. Start up the CMake GUI
-2. Select **Browse Source...** and select DIR/multicraft
-3. Select **Browse Build...** and select DIR/multicraft-build
+2. Select **Browse Source...** and select DIR/squareone-core
+3. Select **Browse Build...** and select DIR/squareone-core-build
 4. Select **Configure**
 5. Choose the right visual Studio version and target platform. It has to match the version of the installed dependencies
 6. Choose **Specify toolchain file for cross-compiling**
@@ -336,7 +343,7 @@ This is outdated and not recommended. Follow the instructions on https://dev.min
 11. If there are any errors, solve them and hit **Configure**
 12. Click **Generate**
 13. Click **Open Project**
-14. Compile MultiCraft inside Visual studio.
+14. Compile SquareOne Core inside Visual studio.
 
 #### b) Using the vcpkg toolchain and the commandline
 

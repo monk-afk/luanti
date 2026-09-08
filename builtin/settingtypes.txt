@@ -978,7 +978,7 @@ enable_remote_media_server (Connect to external media server) bool true
 enable_client_modding (Client modding) bool false
 
 #    URL to the server list displayed in the Multiplayer Tab.
-serverlist_url (Serverlist URL) string servers.multicraft.world
+serverlist_url (Serverlist URL) string https://servers.luanti.org
 
 #    File in client/serverlist/ that contains your favorite servers displayed in the
 #    Multiplayer Tab.
@@ -1004,12 +1004,13 @@ client_mapblock_limit (Mapblock limit) int 7500
 #    Whether to show the client debug info (has the same effect as hitting F5).
 show_debug (Show debug info) bool false
 
-#    URL to JSON file which provides information about the newest MultiCraft release
-update_information_url (Update information URL) string https://updates.multicraft.world/app.json
+#    URL to JSON file which provides information about the newest SquareOne Core release.
+#    Leave empty to disable update checks.
+update_information_url (Update information URL) string
 
 #    Unix timestamp (integer) of when the client last checked for an update
-#    Set this value to "all" to never check for updates.
-update_last_checked (Last update check) string
+#    Set this value to "disabled" to never check for updates.
+update_last_checked (Last update check) string disabled
 
 #    Version number which was last seen during an update check.
 #

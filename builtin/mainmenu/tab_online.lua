@@ -392,7 +392,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 
 		local auto_connect = false
 		for _, server in pairs(serverlist) do
-			if server.server_id == "multicraft" and server.address == gamedata.address then
+			if server.server_id == "minetest" and server.address == gamedata.address then
 				auto_connect = true
 				break
 			end

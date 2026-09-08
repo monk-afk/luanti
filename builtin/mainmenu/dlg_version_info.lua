@@ -151,7 +151,7 @@ local function on_version_info_received(update_info)
 	-- Show version info dialog (once)
 	maintab:hide()
 
-	local url = update_info.url or "https://multicraft.world/downloads"
+	local url = update_info.url or "https://github.com/monk-afk/luanti/releases"
 	if not url:find("://", 1, true) then
 		url = "https://" .. url
 	end

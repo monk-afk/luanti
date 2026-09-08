@@ -5,10 +5,12 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>minetest</string>
+	<string>squareone</string>
+	<key>CFBundleName</key>
+	<string>SquareOne Core</string>
 	<key>CFBundleIconFile</key>
 	<string>minetest-icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>net.minetest.minetest</string>
+	<string>io.github.monk_afk.squareone</string>
 </dict>
 </plist>

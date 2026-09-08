@@ -85,7 +85,7 @@ function render_serverlist_row(spec, is_favorite)
 	local details
 	if is_favorite then
 		details = "1,"
-	elseif spec.server_id == "multicraft" then
+	elseif spec.server_id == "minetest" then
 		details = "2,"
 	else
 		details = "3,"

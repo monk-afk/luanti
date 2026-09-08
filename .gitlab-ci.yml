@@ -285,7 +285,7 @@ package:appimage-client:
     - rm -rf AppDir/usr/share/minetest/games/minetest/.git
     - export VERSION=$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
     # Remove PrefersNonDefaultGPU property due to validation errors
-    - sed -i '/PrefersNonDefaultGPU/d' AppDir/usr/share/applications/net.minetest.minetest.desktop
+    - sed -i '/PrefersNonDefaultGPU/d' AppDir/usr/share/applications/io.github.monk_afk.squareone.desktop
     - appimage-builder --skip-test
   artifacts:
     expire_in: 90 day

@@ -329,11 +329,11 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 
 	// give up
-	errorstream << "MultiCraft can not continue without a valid font. "
+	errorstream << PROJECT_NAME_C " cannot continue without a valid font. "
 			"Please correct the 'font_path' setting or install the font "
 			"file in the proper location" << std::endl;
 #else
-	errorstream << "FontEngine: Tried to load freetype fonts but MultiCraft was"
+	errorstream << "FontEngine: Tried to load freetype fonts but " PROJECT_NAME_C " was"
 			" not compiled with that library." << std::endl;
 #endif
 	abort();

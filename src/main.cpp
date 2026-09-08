@@ -310,13 +310,13 @@ static void set_allowed_options(OptionList *allowed_options)
 	allowed_options->insert(std::make_pair("gameid", ValueSpec(VALUETYPE_STRING,
 			_("Set gameid (\"--gameid list\" prints available ones)"))));
 	allowed_options->insert(std::make_pair("migrate", ValueSpec(VALUETYPE_STRING,
-			_("Migrate from current map backend to another (Only works when using minetestserver or with --server)"))));
+			_("Migrate from current map backend to another (Only works when using squareoneserver or with --server)"))));
 	allowed_options->insert(std::make_pair("migrate-players", ValueSpec(VALUETYPE_STRING,
-		_("Migrate from current players backend to another (Only works when using minetestserver or with --server)"))));
+		_("Migrate from current players backend to another (Only works when using squareoneserver or with --server)"))));
 	allowed_options->insert(std::make_pair("migrate-auth", ValueSpec(VALUETYPE_STRING,
-		_("Migrate from current auth backend to another (Only works when using minetestserver or with --server)"))));
+		_("Migrate from current auth backend to another (Only works when using squareoneserver or with --server)"))));
 	allowed_options->insert(std::make_pair("terminal", ValueSpec(VALUETYPE_FLAG,
-			_("Feature an interactive terminal (Only works when using minetestserver or with --server)"))));
+			_("Feature an interactive terminal (Only works when using squareoneserver or with --server)"))));
 #ifndef SERVER
 	allowed_options->insert(std::make_pair("videomodes", ValueSpec(VALUETYPE_FLAG,
 			_("Show available video modes"))));
@@ -558,17 +558,18 @@ static bool read_config_file(const Settings &cmd_args)
 		g_settings_path = cmd_args.get("config");
 	} else {
 		std::vector<std::string> filenames;
-		filenames.push_back(porting::path_user + DIR_DELIM + "multicraft.conf");
-		// Legacy configuration file location
-		filenames.push_back(porting::path_user +
-				DIR_DELIM + ".." + DIR_DELIM + "multicraft.conf");
-
+		// Prefer SquareOne configuration at every supported location before
+		// falling back to Minetest configuration. New files use squareone.conf.
+		for (const char *name : {"squareone.conf", "minetest.conf"}) {
+			filenames.push_back(porting::path_user + DIR_DELIM + name);
+			filenames.push_back(porting::path_user +
+					DIR_DELIM + ".." + DIR_DELIM + name);
 #if RUN_IN_PLACE
-		// Try also from a lower level (to aid having the same configuration
-		// for many RUN_IN_PLACE installs)
-		filenames.push_back(porting::path_user +
-				DIR_DELIM + ".." + DIR_DELIM + ".." + DIR_DELIM + "multicraft.conf");
+			// Allow several run-in-place installs to share a configuration.
+			filenames.push_back(porting::path_user +
+					DIR_DELIM + ".." + DIR_DELIM + ".." + DIR_DELIM + name);
 #endif
+		}
 
 		for (const std::string &filename : filenames) {
 			bool r = g_settings->readConfigFile(filename.c_str());
@@ -909,7 +910,7 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 		if (!name_ok) {
 			if (admin_nick.empty()) {
 				errorstream << "No name given for admin. "
-					<< "Please check your multicraft.conf that it "
+					<< "Please check your configuration file that it "
 					<< "contains a 'name = ' to your main admin account."
 					<< std::endl;
 			} else {

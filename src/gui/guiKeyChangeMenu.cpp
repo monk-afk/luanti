@@ -179,7 +179,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		rect += topleft + v2s32(25 * s, 10 * s);
 		//gui::IGUIStaticText *t =
 #if !defined(__ANDROID__) && !defined(__IOS__)
-		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
+		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove keymap settings from your configuration file)");
 #else
 		const wchar_t *text = wgettext("Change Keys");
 #endif

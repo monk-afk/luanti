@@ -8,19 +8,19 @@
 
 	pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-autotools git
 
-4. Browse to MultiCraft directory, for example
+4. Browse to SquareOne Core directory, for example
 
-	 cd /c/Users/username/Documents/MultiCraft
+	 cd /c/Users/username/Documents/squareone-core
 
 5. Build inside build/windows directory with
 
 	./Start
 	cmake --build . -j
 
-6. Check libraries linked with multicraft.exe using command below. It should
+6. Check libraries linked with squareone.exe using command below. It should
 	show only system libraries.
 
-	objdump -x ../../bin/multicraft.exe | grep dll
+	objdump -x ../../bin/squareone.exe | grep dll
 
 
 --------------

@@ -1,26 +1,22 @@
-.TH minetest 6 "2 February 2019" "" ""
+.TH squareone 6 "7 September 2026" "" ""
 
 .SH NAME
-minetest, minetestserver \- Multiplayer infinite-world block sandbox
+squareone, squareoneserver \- SquareOne Core voxel game engine
 
 .SH SYNOPSIS
-.B minetest
+.B squareone
 [\fB--server SERVER OPTIONS\fR | \fBCLIENT OPTIONS\fR]
 [\fBCOMMON OPTIONS\fR]
 [\fBWORLD PATH\fR]
 
-.B minetestserver
+.B squareoneserver
 [\fBSERVER OPTIONS\fR]
 [\fBCOMMON OPTIONS\fR]
 [\fBWORLD PATH\fR]
 
 .SH DESCRIPTION
-.B Minetest is one of the first InfiniMiner/Minecraft(/whatever) inspired games
-(started October 2010), with a goal of taking the survival multiplayer gameplay
-in a slightly different direction.
-.PP
-The main design philosophy is to keep it technically simple, stable and
-portable. It will be kept lightweight enough to run on fairly old hardware.
+SquareOne Core is a voxel game engine based on MultiCraft 2.0.6 and Minetest.
+It supports Minetest 0.4 and 5.x clients and Lua mods.
 
 .SH COMMON OPTIONS
 .TP
@@ -115,20 +111,31 @@ leveldb, postgresql, dummy, and files.
 .B \-\-terminal
 Display an interactive terminal over ncurses during execution.
 
+.SH FILES
+.TP
+.B ~/.squareone/
+User data for an installed Unix build, including worlds, games, and mods.
+.TP
+.B squareone.conf
+Read from the user-data directory or its parent. Run-in-place builds also
+search the grandparent directory. If absent in all locations, minetest.conf
+is tried in the same locations. Use --config to select an explicit file.
+
 .SH ENVIRONMENT
 .TP
 .B MINETEST_SUBGAME_PATH
 Colon delimited list of directories to search for games.
 
 .SH BUGS
-Please report all bugs at https://github.com/minetest/minetest/issues.
+Please report all bugs at https://github.com/monk-afk/luanti/issues.
 
 .SH AUTHOR
 .PP
-Perttu Ahola <celeron55@gmail.com> and contributors.
+SquareOne Core contributors, the MultiCraft Development Team,
+Perttu Ahola <celeron55@gmail.com>, and Minetest contributors.
 .PP
 This man page was originally written by
 Juhani Numminen <juhaninumminen0@gmail.com>.
 
 .SH WWW
-http://www.minetest.net/
+https://github.com/monk-afk/luanti
