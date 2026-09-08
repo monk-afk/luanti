@@ -36,7 +36,7 @@ class Sky : public scene::ISceneNode
 {
 public:
 	//! constructor
-	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc);
+	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, u64 map_seed);
 
 	virtual void OnRegisterSceneNode();
 
@@ -80,6 +80,8 @@ public:
 	void setStarCount(u16 star_count, bool force_update);
 	void setStarColor(video::SColor star_color) { m_star_params.starcolor = star_color; }
 	void setStarScale(f32 star_scale) { m_star_params.scale = star_scale; updateStars(); }
+	void setStarDayOpacity(f32 day_opacity) { m_star_params.day_opacity = day_opacity; }
+	void setStarSeed(u64 star_seed);
 
 	bool getCloudsVisible() const { return m_clouds_visible && m_clouds_enabled; }
 	const video::SColorf &getCloudColor() const { return m_cloudcolor_f; }
@@ -183,7 +185,8 @@ private:
 
 	bool m_default_tint = true;
 
-	u64 m_seed = 0;
+	// Stable random fallback when the server explicitly requests star_seed = 0.
+	const u64 m_seed;
 	irr_ptr<scene::SMeshBuffer> m_stars;
 	video::SColorf m_star_color;
 

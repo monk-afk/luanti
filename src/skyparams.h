@@ -66,6 +66,8 @@ struct StarParams
 	u32 count;
 	video::SColor starcolor;
 	f32 scale;
+	f32 day_opacity;
+	u64 star_seed;
 };
 
 // Utility class for setting default sky, sun, moon, stars values:
@@ -109,13 +111,15 @@ public:
 		return moon;
 	}
 
-	const StarParams getStarDefaults()
+	const StarParams getStarDefaults(u64 star_seed = 0)
 	{
 		StarParams stars;
 		stars.visible = true;
 		stars.count = 1000;
 		stars.starcolor = video::SColor(105, 235, 235, 255);
 		stars.scale = 1;
+		stars.day_opacity = 0;
+		stars.star_seed = star_seed;
 		return stars;
 	}
 };

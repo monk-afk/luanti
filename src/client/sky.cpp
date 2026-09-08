@@ -52,9 +52,10 @@ static video::SMaterial baseMaterial()
 	return mat;
 };
 
-Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc) :
+Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, u64 map_seed) :
 		scene::ISceneNode(RenderingEngine::get_scene_manager()->getRootSceneNode(),
-			RenderingEngine::get_scene_manager(), id)
+			RenderingEngine::get_scene_manager(), id),
+		m_seed((u64)myrand() << 32 | myrand())
 {
 	setAutomaticCulling(scene::EAC_OFF);
 	m_box.MaxEdge.set(0, 0, 0);
@@ -80,6 +81,8 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc) :
 
 	// Ensures that sun and moon textures and tonemaps are correct.
 	setSkyDefaults();
+	// Zero is reserved for client-chosen randomness in Luanti's star_seed API.
+	m_star_params.star_seed = map_seed ? map_seed : 1;
 	m_sun_texture = tsrc->isKnownSourceImage(m_sun_params.texture) ?
 		tsrc->getTextureForMesh(m_sun_params.texture) : nullptr;
 	m_moon_texture = tsrc->isKnownSourceImage(m_moon_params.texture) ?
@@ -698,7 +701,8 @@ void Sky::draw_stars(video::IVideoDriver * driver, float wicked_time_of_day)
 	float tod = wicked_time_of_day < 0.5f ? wicked_time_of_day : (1.0f - wicked_time_of_day);
 	float starbrightness = (0.25f - fabsf(tod)) * 20.0f;
 	m_star_color = m_star_params.starcolor;
-	m_star_color.a *= clamp(starbrightness, 0.0f, 1.0f);
+	m_star_color.a *= clamp(starbrightness,
+		clamp(m_star_params.day_opacity, 0.0f, 1.0f), 1.0f);
 	if (m_star_color.a <= 0.0f) // Stars are only drawn when not fully transparent
 		return;
 	m_materials[0].DiffuseColor = m_materials[0].EmissiveColor = m_star_color.toSColor();
@@ -832,7 +836,14 @@ void Sky::setStarCount(u16 star_count, bool force_update)
 	// Allow force updating star count at game init.
 	if (m_star_params.count != star_count || force_update) {
 		m_star_params.count = star_count;
-		m_seed = (u64)myrand() << 32 | myrand();
+		updateStars();
+	}
+}
+
+void Sky::setStarSeed(u64 star_seed)
+{
+	if (m_star_params.star_seed != star_seed) {
+		m_star_params.star_seed = star_seed;
 		updateStars();
 	}
 }
@@ -852,14 +863,14 @@ void Sky::updateStars()
 	m_stars->Indices.reallocate(6 * m_star_params.count);
 
 	video::SColor fallback_color = m_star_params.starcolor; // used on GLES 2 “without shaders”
-	PcgRandom rgen(m_seed);
+	PcgRandom rgen(m_star_params.star_seed == 0 ? m_seed : m_star_params.star_seed);
 	float d = (0.003 / 2) * m_star_params.scale;
 	for (u16 i = 0; i < m_star_params.count; i++) {
-		v3f r = v3f(
-			rgen.range(-10000, 10000),
-			rgen.range(-10000, 10000),
-			rgen.range(-10000, 10000)
-		);
+		// Function argument evaluation order differs between compilers.
+		const s32 x = rgen.range(-10000, 10000);
+		const s32 y = rgen.range(-10000, 10000);
+		const s32 z = rgen.range(-10000, 10000);
+		v3f r(x, y, z);
 		core::CMatrix4<f32> a;
 		a.buildRotateFromTo(v3f(0, 1, 0), r);
 		v3f p = v3f(-d, 1, -d);

@@ -2067,6 +2067,20 @@ int ObjectRef::l_set_stars(lua_State *L)
 
 	star_params.scale = getfloatfield_default(L, 2,
 		"scale", star_params.scale);
+	star_params.day_opacity = getfloatfield_default(L, 2,
+		"day_opacity", star_params.day_opacity);
+
+	// Do not pass the existing u64 seed through getintfield_default: even an
+	// omitted field would truncate the world seed to a signed 32-bit integer.
+	lua_getfield(L, 2, "star_seed");
+	if (!lua_isnil(L, -1)) {
+		const lua_Number seed = luaL_checknumber(L, -1);
+		if (!(seed >= 0 && seed < 18446744073709551616.0) ||
+				std::floor(seed) != seed)
+			return luaL_error(L, "star_seed must be an unsigned 64-bit integer");
+		star_params.star_seed = static_cast<u64>(seed);
+	}
+	lua_pop(L, 1);
 
 	getServer(L)->setStars(player, star_params);
 	lua_pushboolean(L, true);
@@ -2093,6 +2107,10 @@ int ObjectRef::l_get_stars(lua_State *L)
 	lua_setfield(L, -2, "star_color");
 	lua_pushnumber(L, star_params.scale);
 	lua_setfield(L, -2, "scale");
+	lua_pushnumber(L, star_params.day_opacity);
+	lua_setfield(L, -2, "day_opacity");
+	lua_pushnumber(L, star_params.star_seed);
+	lua_setfield(L, -2, "star_seed");
 	return 1;
 }
 

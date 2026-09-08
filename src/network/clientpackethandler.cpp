@@ -1228,7 +1228,7 @@ void Client::handleCommand_HudSetSky(NetworkPacket* pkt)
 		SkyboxDefaults sky_defaults;
 		SunParams sun = sky_defaults.getSunDefaults();
 		MoonParams moon = sky_defaults.getMoonDefaults();
-		StarParams stars = sky_defaults.getStarDefaults();
+		StarParams stars = sky_defaults.getStarDefaults(m_map_seed ? m_map_seed : 1);
 
 		// Fix for "regular" skies, as color isn't kept:
 		if (skybox.type == "regular") {
@@ -1321,10 +1321,15 @@ void Client::handleCommand_HudSetMoon(NetworkPacket *pkt)
 
 void Client::handleCommand_HudSetStars(NetworkPacket *pkt)
 {
-	StarParams stars;
+	// Older servers omit one or both of the optional tail fields.
+	StarParams stars = SkyboxDefaults().getStarDefaults(m_map_seed ? m_map_seed : 1);
 
 	*pkt >> stars.visible >> stars.count
 		>> stars.starcolor >> stars.scale;
+	if (pkt->getRemainingBytes() >= sizeof(f32))
+		*pkt >> stars.day_opacity;
+	if (pkt->getRemainingBytes() >= sizeof(u64))
+		*pkt >> stars.star_seed;
 
 	ClientEvent *event = new ClientEvent();
 	event->type        = CE_SET_STARS;

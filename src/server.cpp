@@ -1782,10 +1782,15 @@ void Server::SendSetMoon(session_t peer_id, const MoonParams &params)
 }
 void Server::SendSetStars(session_t peer_id, const StarParams &params)
 {
+	// 0.4-era clients do not implement this command.
+	if (m_clients.getProtocolVersion(peer_id) < 39)
+		return;
+
 	NetworkPacket pkt(TOCLIENT_SET_STARS, 0, peer_id);
 
 	pkt << params.visible << params.count
-		<< params.starcolor << params.scale;
+		<< params.starcolor << params.scale
+		<< params.day_opacity << params.star_seed;
 
 	Send(&pkt);
 }
@@ -3954,6 +3959,9 @@ PlayerSAO* Server::emergePlayer(const char *name, session_t peer_id, u16 proto_v
 
 	if (!player) {
 		player = new RemotePlayer(name, idef());
+		const u64 map_seed = m_env->getServerMap().getSeed();
+		// The wire/API value zero means random, so world zero uses seed one.
+		player->setStars(SkyboxDefaults().getStarDefaults(map_seed ? map_seed : 1));
 	}
 
 	bool newplayer = false;

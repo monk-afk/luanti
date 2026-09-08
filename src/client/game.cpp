@@ -1401,7 +1401,7 @@ bool Game::createClient(const GameStartData &start_data)
 
 	/* Skybox
 	 */
-	sky = new Sky(-1, texture_src, shader_src);
+	sky = new Sky(-1, texture_src, shader_src, client->getMapSeed());
 	scsf->setSky(sky);
 	skybox = NULL;	// This is used/set later on in the main run loop
 
@@ -2989,6 +2989,8 @@ void Game::handleClientEvent_SetStars(ClientEvent *event, CameraOrientation *cam
 	sky->setStarCount(event->star_params->count, false);
 	sky->setStarColor(event->star_params->starcolor);
 	sky->setStarScale(event->star_params->scale);
+	sky->setStarDayOpacity(event->star_params->day_opacity);
+	sky->setStarSeed(event->star_params->star_seed);
 	delete event->star_params;
 }
 

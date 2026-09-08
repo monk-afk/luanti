@@ -6721,6 +6721,16 @@ object you are working with still exists.
             alpha channel is used to set overall star brightness.
             (default: `#ebebff69`)
         * `scale`: Float controlling the overall size of the stars (default: `1`)
+        * `day_opacity`: Minimum star opacity during daytime, from `0` to `1`
+            (default: `0`).
+        * `star_seed`: Unsigned integer seed for generating stars. `0` lets the
+            client choose a random seed, matching Luanti's API. SquareOne Core
+            defaults to the mapgen seed (world seed `0` uses `1`). Omitted fields
+            retain their current values. Lua numbers cannot represent every
+            integer above `2^53` exactly; the automatic world-seed default is
+            transmitted as a full 64-bit value without passing through Lua.
+            Clients without `star_seed` support ignore this field and continue
+            generating stars locally; this cannot make those clients deterministic.
 * `get_stars()`: returns a table with the current stars parameters as in
     `set_stars`.
 * `set_clouds(cloud_parameters)`: set cloud parameters

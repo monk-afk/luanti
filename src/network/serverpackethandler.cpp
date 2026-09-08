@@ -413,6 +413,10 @@ void Server::handleCommand_ClientReady(NetworkPacket* pkt)
 	m_clients.sendToAll(&notice_pkt);
 	m_clients.event(peer_id, CSE_SetClientReady);
 
+	// Send the world-derived default even when no mod calls set_stars().
+	// Do this before join callbacks so their overrides remain authoritative.
+	SendSetStars(peer_id, playersao->getPlayer()->getStarParams());
+
 	s64 last_login;
 	m_script->getAuth(playersao->getPlayer()->getName(), nullptr, nullptr, &last_login);
 	m_script->on_joinplayer(playersao, last_login);
