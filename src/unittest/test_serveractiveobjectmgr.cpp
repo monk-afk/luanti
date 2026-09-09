@@ -75,14 +75,12 @@ void TestServerActiveObjectMgr::testLuaEntityDescription()
 	// those as dropped items.
 	LuaEntitySAO other(nullptr, v3f(), "mod:entity", "");
 	other.accessObjectProperties()->wield_item = "default:stone";
-	UASSERT(other.getDescription().find(
-			"LuaEntitySAO \"mod:entity\" at ") == 0);
+	UASSERT(other.getDescription().find("LuaEntitySAO \"mod:entity\" at ") == 0);
 
 	// Description generation is used while processing interactions and must be
 	// safe even if a mod supplies malformed item data.
 	item.accessObjectProperties()->wield_item = "default:stone invalid";
-	UASSERT(item.getDescription().find(
-			"LuaEntitySAO \"__builtin:item\" at ") == 0);
+	UASSERT(item.getDescription().find("LuaEntitySAO \"__builtin:item\" at ") == 0);
 }
 
 void clearSAOMgr(server::ActiveObjectMgr *saomgr)
