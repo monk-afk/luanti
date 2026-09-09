@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "luaentity_sao.h"
 #include "collision.h"
 #include "constants.h"
+#include "inventory.h"
 #include "player_sao.h"
 #include "scripting_server.h"
 #include "server.h"
@@ -394,6 +395,18 @@ float LuaEntitySAO::getMinimumSavedMovement()
 std::string LuaEntitySAO::getDescription()
 {
 	std::ostringstream oss;
+	if (m_init_name == "__builtin:item" && !m_prop.wield_item.empty()) {
+		ItemStack stack;
+		try {
+			stack.deSerialize(m_prop.wield_item);
+			if (!stack.name.empty()) {
+				oss << stack.name << " at " << PP(floatToInt(m_base_position, BS));
+				return oss.str();
+			}
+		} catch (const SerializationError &) {
+			// A malformed property must not break logging or object interaction.
+		}
+	}
 	oss << "LuaEntitySAO \"" << m_init_name << "\" ";
 	auto pos = floatToInt(m_base_position, BS);
 	oss << "at " << PP(pos);

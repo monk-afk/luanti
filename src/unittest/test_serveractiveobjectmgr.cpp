@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "server/activeobjectmgr.h"
+#include "server/luaentity_sao.h"
 #include <algorithm>
 #include <queue>
 #include "test.h"
@@ -48,6 +49,7 @@ public:
 	void testRemoveObject();
 	void testGetObjectsInsideRadius();
 	void testGetAddedActiveObjectsAroundPos();
+	void testLuaEntityDescription();
 };
 
 static TestServerActiveObjectMgr g_test_instance;
@@ -59,6 +61,28 @@ void TestServerActiveObjectMgr::runTests(IGameDef *gamedef)
 	TEST(testRemoveObject)
 	TEST(testGetObjectsInsideRadius);
 	TEST(testGetAddedActiveObjectsAroundPos);
+	TEST(testLuaEntityDescription);
+}
+
+void TestServerActiveObjectMgr::testLuaEntityDescription()
+{
+	LuaEntitySAO item(nullptr, v3f(), "__builtin:item", "");
+	item.accessObjectProperties()->wield_item = "default:stone 42";
+	UASSERT(item.getDescription().find("default:stone at ") == 0);
+	UASSERT(item.getDescription().find("LuaEntitySAO") == std::string::npos);
+
+	// Other entities may also use wield_item for their visuals; do not label
+	// those as dropped items.
+	LuaEntitySAO other(nullptr, v3f(), "mod:entity", "");
+	other.accessObjectProperties()->wield_item = "default:stone";
+	UASSERT(other.getDescription().find(
+			"LuaEntitySAO \"mod:entity\" at ") == 0);
+
+	// Description generation is used while processing interactions and must be
+	// safe even if a mod supplies malformed item data.
+	item.accessObjectProperties()->wield_item = "default:stone invalid";
+	UASSERT(item.getDescription().find(
+			"LuaEntitySAO \"__builtin:item\" at ") == 0);
 }
 
 void clearSAOMgr(server::ActiveObjectMgr *saomgr)
