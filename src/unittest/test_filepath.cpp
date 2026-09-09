@@ -38,6 +38,7 @@ public:
 	void testRemoveLastPathComponent();
 	void testRemoveLastPathComponentWithTrailingDelimiter();
 	void testRemoveRelativePathComponent();
+	void testAbsolutePathPartial();
 };
 
 static TestFilePath g_test_instance;
@@ -49,6 +50,7 @@ void TestFilePath::runTests(IGameDef *gamedef)
 	TEST(testRemoveLastPathComponent);
 	TEST(testRemoveLastPathComponentWithTrailingDelimiter);
 	TEST(testRemoveRelativePathComponent);
+	TEST(testAbsolutePathPartial);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,4 +263,19 @@ void TestFilePath::testRemoveRelativePathComponent()
 	path = p("/a/b/c/.././../d/../e/f/g/../h/i/j/../../../..");
 	result = fs::RemoveRelativePathComponents(path);
 	UASSERT(result == p("/a/e"));
+}
+
+void TestFilePath::testAbsolutePathPartial()
+{
+	UASSERT(fs::AbsolutePathPartial("").empty());
+
+	const std::string cwd = fs::AbsolutePath(".");
+	UASSERT(!cwd.empty());
+	UASSERT(fs::AbsolutePathPartial(".") == cwd);
+	UASSERT(fs::AbsolutePathPartial(p("./missing/../world")) ==
+			cwd + DIR_DELIM + "world");
+
+	const std::string base = getTestTempDirectory();
+	UASSERT(fs::AbsolutePathPartial(base + p("/missing/world")) ==
+			base + p("/missing/world"));
 }

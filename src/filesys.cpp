@@ -702,6 +702,35 @@ std::string AbsolutePath(const std::string &path)
 	return abs_path_str;
 }
 
+std::string AbsolutePathPartial(const std::string &path)
+{
+	if (path.empty())
+		return "";
+
+	std::string abs_path = AbsolutePath(path);
+	if (!abs_path.empty())
+		return abs_path;
+
+	std::string cur_path = path;
+	std::string removed;
+	while (abs_path.empty() && !cur_path.empty()) {
+		std::string component;
+		cur_path = RemoveLastPathComponent(cur_path, &component);
+		removed = component + (removed.empty() ? "" : DIR_DELIM + removed);
+		abs_path = AbsolutePath(cur_path);
+	}
+
+	// A relative path may have no existing leading component other than cwd.
+	if (cur_path.empty() && !IsPathAbsolute(path))
+		abs_path = AbsolutePath(".");
+	if (abs_path.empty())
+		return "";
+
+	if (!removed.empty())
+		abs_path.append(DIR_DELIM).append(removed);
+	return RemoveRelativePathComponents(abs_path);
+}
+
 const char *GetFilenameFromPath(const char *path)
 {
 	const char *filename = strrchr(path, DIR_DELIM_CHAR);

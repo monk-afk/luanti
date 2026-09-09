@@ -771,7 +771,12 @@ static std::string get_clean_world_path(const std::string &path)
 	} else {
 		clean_path = path;
 	}
-	return path;
+
+	if (clean_path.empty())
+		return clean_path;
+
+	const std::string absolute_path = fs::AbsolutePathPartial(clean_path);
+	return absolute_path.empty() ? clean_path : absolute_path;
 }
 
 
